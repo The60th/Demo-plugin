@@ -1,6 +1,7 @@
 package com.worldciv.the60th;
 
 import org.bukkit.configuration.file.FileConfiguration;
+import org.bukkit.event.Listener;
 import org.bukkit.permissions.Permission;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.PluginDescriptionFile;
@@ -9,7 +10,7 @@ import org.bukkit.plugin.java.JavaPlugin;
 
 import java.util.logging.Logger;
 
-public class Main extends JavaPlugin{
+public class Main extends JavaPlugin implements Listener{
     FileConfiguration config = getConfig();
     private static Plugin plugin;
 
@@ -41,6 +42,9 @@ public class Main extends JavaPlugin{
         //pm.addPermission(p);
 
     }
+
+
+
     public static Plugin getPlugin() {
         return plugin;
     }
