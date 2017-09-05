@@ -7,5 +7,6 @@ public class Main extends JavaPlugin{
     public static void main(String[] args) {
 	// write your code here
         // test
+        // My changes
     }
 }
