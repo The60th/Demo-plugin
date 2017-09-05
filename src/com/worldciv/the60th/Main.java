@@ -14,7 +14,6 @@ public class Main extends JavaPlugin{
     private static Plugin plugin;
 
     public void onEnable() {
-
         PluginDescriptionFile pdfFile = this.getDescription();
         Logger logger = Logger.getLogger("Minecraft");
 
@@ -38,7 +37,7 @@ public class Main extends JavaPlugin{
     }
     private void registerPermissons(){
         //PluginManager pm = getServer().getPluginManager();
-        // Permission p = new Permission("Permisson name");
+        //Permission p = new Permission("Permisson name");
         //pm.addPermission(p);
 
     }
