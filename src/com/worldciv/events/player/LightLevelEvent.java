@@ -43,8 +43,8 @@ public class LightLevelEvent implements Listener{
                 player.sendMessage(ChatColor.GOLD + "Your vision begins to clear up.");
                 player.removePotionEffect(PotionEffectType.BLINDNESS);
                 currentlyBlinded.remove(player);
-                player.addPotionEffect(new PotionEffect(PotionEffectType.BLINDNESS, 5, 1));
-                player.addPotionEffect(new PotionEffect(PotionEffectType.CONFUSION, 5, 1));
+                player.addPotionEffect(new PotionEffect(PotionEffectType.BLINDNESS, 20, 1));
+                player.addPotionEffect(new PotionEffect(PotionEffectType.CONFUSION, 20, 1));
             }
 
         }
