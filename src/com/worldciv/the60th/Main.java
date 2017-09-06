@@ -1,5 +1,7 @@
 package com.worldciv.the60th;
 
+import com.worldciv.events.player.LightLevelEvent;
+import com.worldciv.events.player.TorchEvent;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.event.Listener;
 import org.bukkit.permissions.Permission;
@@ -21,6 +23,7 @@ public class Main extends JavaPlugin implements Listener{
         logger.info(pdfFile.getName()
                 + "has successfully enabled. The current version is: "
                 + pdfFile.getVersion());
+        registerEvents();
     }
 
     public void onDisable() {
@@ -33,8 +36,9 @@ public class Main extends JavaPlugin implements Listener{
         //this.getCommand("name").setExecutor(new class());
     }
     public void registerEvents(){
-        //PluginManager pm = getServer().getPluginManager();
-        //pm.registerEvents(class , this);
+        PluginManager pm = getServer().getPluginManager();
+        pm.registerEvents(new LightLevelEvent(), this);
+        pm.registerEvents(new TorchEvent(), this);
     }
     private void registerPermissons(){
         //PluginManager pm = getServer().getPluginManager();

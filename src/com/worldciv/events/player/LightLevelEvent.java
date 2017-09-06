@@ -1,5 +1,6 @@
 package com.worldciv.events.player;
 
+import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.entity.Player;
@@ -24,20 +25,26 @@ public class LightLevelEvent implements Listener{
         int LightLevel = vision.getBlock().getLightLevel();
 
 
-        if(LightLevel <= 4){
+        if(LightLevel <= 5){
+            if(TorchEvent.currentlyLit.contains(player)){
+                Bukkit.broadcastMessage(player.getDisplayName() + " returning becuase current lit.");
+                return;
+            }
             if (!currentlyBlinded.contains(player)) {
                 player.sendMessage(ChatColor.GOLD + "Your vision becomes unclear.");
-                player.addPotionEffect(new PotionEffect(PotionEffectType.BLINDNESS, 9999, 10));
+                player.addPotionEffect(new PotionEffect(PotionEffectType.BLINDNESS, 99999, 1));
                 currentlyBlinded.add(player);
             }
         }
 
-        if (LightLevel > 4) {
+        else if (LightLevel > 5) {
             if (currentlyBlinded.contains(player)) {
                 //You are currently blinded. Stop spamming me.
                 player.sendMessage(ChatColor.GOLD + "Your vision begins to clear up.");
                 player.removePotionEffect(PotionEffectType.BLINDNESS);
                 currentlyBlinded.remove(player);
+                player.addPotionEffect(new PotionEffect(PotionEffectType.BLINDNESS, 5, 1));
+                player.addPotionEffect(new PotionEffect(PotionEffectType.CONFUSION, 5, 1));
             }
 
         }
