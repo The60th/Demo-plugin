@@ -19,11 +19,16 @@ import java.util.ArrayList;
 public class TorchEvent implements Listener {
     public static ArrayList<Player> currentlyLit = new ArrayList<Player>();
 
+    //6 block range for hand held torchs
+
+    //BUGS:
+    //When you swap into your off hand, the game thinks your are still lite.
+    //
     @EventHandler
     public void onPlayerItemHeldEvent(PlayerItemHeldEvent event) {
         Player player = event.getPlayer();
         ItemStack itemStack = player.getInventory().getItem(event.getNewSlot());
-        if ((itemStack == null || itemStack.getType() != Material.TORCH) && player.getInventory().getItemInOffHand().getType() != Material.TORCH) {
+        if ((itemStack == null || itemStack.getType() != Material.TORCH)) {
             if (currentlyLit.contains(player)) {
                 currentlyLit.remove(player);
             }
@@ -40,8 +45,8 @@ public class TorchEvent implements Listener {
                     currentlyLit.add(player);
                     Bukkit.broadcastMessage(player.getDisplayName() + " player is currently blindly -- removing");
                     player.removePotionEffect(PotionEffectType.BLINDNESS);
-                    player.addPotionEffect(new PotionEffect(PotionEffectType.BLINDNESS, 5, 1));
-                    player.addPotionEffect(new PotionEffect(PotionEffectType.CONFUSION, 5, 1));
+                    player.addPotionEffect(new PotionEffect(PotionEffectType.BLINDNESS, 100, 1));
+                    player.addPotionEffect(new PotionEffect(PotionEffectType.CONFUSION, 100, 1));
 
                 }
             }

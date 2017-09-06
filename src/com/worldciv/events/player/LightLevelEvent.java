@@ -27,7 +27,7 @@ public class LightLevelEvent implements Listener{
 
         if(LightLevel <= 5){
             if(TorchEvent.currentlyLit.contains(player)){
-                Bukkit.broadcastMessage(player.getDisplayName() + " returning becuase current lit.");
+               // Bukkit.broadcastMessage(player.getDisplayName() + " returning becuase current lit.");
                 return;
             }
             if (!currentlyBlinded.contains(player)) {
