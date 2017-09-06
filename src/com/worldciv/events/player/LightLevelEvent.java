@@ -9,9 +9,11 @@ import org.bukkit.event.player.PlayerMoveEvent;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
 
+import java.util.ArrayList;
+
 public class LightLevelEvent implements Listener{
 
-    public Player[] currentlyBlinded;
+    public static ArrayList<Player> currentlyBlinded = new ArrayList<Player>();
 
     @EventHandler
     public void onMove(PlayerMoveEvent event) {
@@ -23,11 +25,20 @@ public class LightLevelEvent implements Listener{
 
 
         if(LightLevel <= 4){
+            if (!currentlyBlinded.contains(player)) {
+                player.sendMessage(ChatColor.GOLD + "Your vision becomes unclear.");
+                player.addPotionEffect(new PotionEffect(PotionEffectType.BLINDNESS, 9999, 10));
+                currentlyBlinded.add(player);
+            }
+        }
 
-            player.sendMessage(ChatColor.GOLD + "Your vision becomes unclear.");
-            player.addPotionEffect(new PotionEffect(PotionEffectType.BLINDNESS, 9999, 10));
-            currentlyBlinded.add(p);
-
+        if (LightLevel > 4) {
+            if (currentlyBlinded.contains(player)) {
+                //You are currently blinded. Stop spamming me.
+                player.sendMessage(ChatColor.GOLD + "Your vision begins to clear up.");
+                player.removePotionEffect(PotionEffectType.BLINDNESS);
+                currentlyBlinded.remove(player);
+            }
 
         }
 
