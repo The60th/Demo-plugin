@@ -29,7 +29,11 @@ public class LightLevelEvent implements Listener{
 
         if(LightLevel <= 5){
             if(TorchEvent.holdingLight.contains(player)){
-                return;
+                if(currentlyBlinded.contains(player)) {
+                    currentlyBlinded.remove(player);
+                }
+                    return;
+
             }
             else{
                 player.getNearbyEntities(5,5,5);
@@ -39,12 +43,17 @@ public class LightLevelEvent implements Listener{
                         if(TorchEvent.holdingLight.contains((Player)entitylist.get(i))){
                             player.removePotionEffect(PotionEffectType.BLINDNESS);
                             player.addPotionEffect(new PotionEffect(PotionEffectType.CONFUSION, 100, 3));
+                            if(currentlyBlinded.contains(player)) {
+                                currentlyBlinded.remove(player);
+                            }
+
                             return;
                         }
                     }
                 }
                 if(!(player.hasPotionEffect(PotionEffectType.BLINDNESS))){
                     player.sendMessage(ChatColor.GOLD + "Your vision becomes unclear.");
+                    currentlyBlinded.add(player);
 
                 }
                 player.addPotionEffect(new PotionEffect(PotionEffectType.BLINDNESS, 99999, 1));
@@ -57,6 +66,7 @@ public class LightLevelEvent implements Listener{
                 player.sendMessage(ChatColor.GOLD + "Your vision begins to clear up.");
                 player.removePotionEffect(PotionEffectType.BLINDNESS);
                 player.addPotionEffect(new PotionEffect(PotionEffectType.CONFUSION, 100, 3));
+                currentlyBlinded.remove(player);
             }
         }
     }

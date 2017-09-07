@@ -7,10 +7,10 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerJoinEvent;
-import org.bukkit.plugin.Plugin;
 import org.bukkit.scoreboard.*;
 
 public class scoreboard implements Listener{
+
     @SuppressWarnings("deprecation")
     @EventHandler
     public void PlayerJoin(PlayerJoinEvent e) {
@@ -27,13 +27,9 @@ public class scoreboard implements Listener{
                 final Objective objective = board.registerNewObjective("test", "dummy");
 
 
-                final Team team = board.registerNewTeam("status");
+                final Team team = board.registerNewTeam("vision status");
 
-                for (Player player : Bukkit.getOnlinePlayers()) {
-                    team.addPlayer(player);
-                }
-
-                team.setPrefix(ChatColor.GOLD + "");
+                team.setPrefix(ChatColor.RED + "[T] " + ChatColor.RESET);
                 team.setCanSeeFriendlyInvisibles(true);
                 team.setDisplayName("test");
 
@@ -69,6 +65,25 @@ public class scoreboard implements Listener{
 
                 Score score5 = objective.getScore(ChatColor.RED + "Torch [T]:" + ChatColor.BLUE + "   ✓");
                 score5.setScore(3);
+
+
+                if (LightLevelEvent.currentlyBlinded.contains(p)) {
+                    p.sendMessage("blinded");
+                    if (team.hasPlayer(p)) {
+
+                            team.removePlayer(p);
+
+
+                    }
+                }
+                if (!LightLevelEvent.currentlyBlinded.contains(p)) {
+                    p.sendMessage("vision");
+                    for (Player player : Bukkit.getOnlinePlayers()) {
+                    team.addPlayer(player);
+                      }
+                }
+
+
 
                 p.setScoreboard(board);
 

@@ -2,6 +2,7 @@ package com.worldciv.the60th;
 
 import com.worldciv.events.player.LightLevelEvent;
 import com.worldciv.events.player.TorchEvent;
+import com.worldciv.events.player.scoreboard;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.configuration.file.FileConfiguration;
@@ -19,11 +20,13 @@ import java.util.logging.Logger;
 
 public class Main extends JavaPlugin implements Listener{
     FileConfiguration config = getConfig();
-    private static Plugin plugin;
+    public static Plugin plugin;
+
     //public static ScoreboardManager manager = Bukkit.getScoreboardManager();
     //public static Scoreboard board = manager.getNewScoreboard();
     //public static Team team = board.registerNewTeam("holdingLight");
     public void onEnable() {
+        plugin = this;
         PluginDescriptionFile pdfFile = this.getDescription();
         Logger logger = Logger.getLogger("Minecraft");
 
@@ -50,6 +53,7 @@ public class Main extends JavaPlugin implements Listener{
         PluginManager pm = getServer().getPluginManager();
         pm.registerEvents(new LightLevelEvent(), this);
         pm.registerEvents(new TorchEvent(), this);
+        pm.registerEvents(new scoreboard(), this);
     }
     private void registerPermissons(){
         //PluginManager pm = getServer().getPluginManager();
