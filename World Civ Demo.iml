@@ -10,5 +10,6 @@
     <orderEntry type="library" name="spigot-api-1.11-R0.1-SNAPSHOT-shaded" level="project" />
     <orderEntry type="library" name="craftbukkit-1.11" level="project" />
     <orderEntry type="library" name="bukkit-1.11.2-R0.1-SNAPSHOT-shaded" level="project" />
+    <orderEntry type="library" name="TAB v1.4.8" level="project" />
   </component>
 </module>

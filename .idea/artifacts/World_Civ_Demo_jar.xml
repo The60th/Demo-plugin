@@ -1,6 +1,6 @@
 <component name="ArtifactManager">
   <artifact type="jar" name="World Civ Demo:jar">
-    <output-path>$PROJECT_DIR$/out/artifacts/World_Civ_Demo_jar</output-path>
+    <output-path>$PROJECT_DIR$/../Project Server/plugins</output-path>
     <root id="archive" name="World Civ Demo.jar">
       <element id="module-output" name="World Civ Demo" />
       <element id="extracted-dir" path="$PROJECT_DIR$/../spigot-api-1.11-R0.1-SNAPSHOT-shaded.jar" path-in-jar="/" />
