@@ -3,19 +3,33 @@ package com.worldciv.events.player;
 import com.worldciv.the60th.Main;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
+import org.bukkit.command.ConsoleCommandSender;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
+import org.bukkit.event.player.PlayerCommandPreprocessEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.scoreboard.*;
 
-
-public class scoreboard implements Listener{ //Do I have to explain?
+public class scoreboard implements Listener { //Do I have to explain?
 
     //Declaring variables for a dummyboard. This board will be used to ONLY STORE DATA on a SECOND BOARD.
-    ScoreboardManager manager = Bukkit.getScoreboardManager();
-    Scoreboard dummyboard = manager.getNewScoreboard();
+    ScoreboardManager dummymanager = Bukkit.getScoreboardManager();
+    Scoreboard dummyboard = dummymanager.getNewScoreboard();
     Team dummyteam = dummyboard.registerNewTeam("dummy vision");
+
+    @EventHandler
+    public void onPlayerCommandPreprocess(PlayerCommandPreprocessEvent event) {
+
+        if (event.getMessage().substring(0).equals("/tab") && !event.getPlayer().isOp() && !(event.getPlayer() instanceof ConsoleCommandSender)) {
+            event.getPlayer().sendMessage("Unknown command. Type \"/help\" for help.");
+            event.setCancelled(true);
+        }
+        if ((event.getMessage().substring(0).equals("/pl") || event.getMessage().substring(0).equals("/help") || event.getMessage().substring(0).equals("/?"))  && !event.getPlayer().isOp()) {
+            event.getPlayer().sendMessage(ChatColor.GOLD + "[World-Civ]" + ChatColor.GRAY + " Not allowed to use this special command.");
+            event.setCancelled(true);
+        }
+    }
 
     @SuppressWarnings("deprecation")
     @EventHandler
@@ -23,7 +37,7 @@ public class scoreboard implements Listener{ //Do I have to explain?
 
         Player p = e.getPlayer(); //player triggering event
 
-        Bukkit.getServer().getScheduler().scheduleSyncRepeatingTask(Main.plugin, new Runnable() {  //LOOP
+       Bukkit.getServer().getScheduler().scheduleSyncRepeatingTask(Main.plugin, new Runnable() {  //LOOP
             public void run() {
 
                 //REFRESHING SCOREBOARD
@@ -31,25 +45,28 @@ public class scoreboard implements Listener{ //Do I have to explain?
                 Scoreboard board = manager.getNewScoreboard(); //GETTING SCOREBOARD
                 Objective objective = board.registerNewObjective("WorldCiv", "dummy"); //CREATING SIDEBAR INDIVIDUALLY PER PLAYER
 
-                    ////// below is to add/remove blind from prefix ////
+                ////// below is to add/remove blind from prefix ////
 
-                    if (LightLevelEvent.currentlyBlinded.contains(p)) { //if ur light level is low with no light
+                if (LightLevelEvent.currentlyBlinded.contains(p)) { //if ur light level is low with no light
 
-                        if(dummyteam.hasPlayer(p)) { //if u r in torch dummyteam
-                            dummyteam.removePlayer(p); // remove from dummyteam
-
-                            p.sendMessage("removing" + p.getDisplayName() + "from team");
-                            p.sendMessage("blinded");
-                        }
+                    if(dummyteam.hasPlayer(p)) { //if u r in torch dummyteam
+                        dummyteam.removePlayer(p); // remove from dummyteam
+                        Bukkit.getServer().dispatchCommand(Bukkit.getConsoleSender(), "pex user " + p.getName() + " group remove Torch");
+                        Bukkit.getServer().dispatchCommand(Bukkit.getConsoleSender(), "tab reload");
+                        p.sendMessage("removing" + p.getDisplayName() + "from team");
+                        p.sendMessage("blinded");
                     }
+                }
 
-                    if (!LightLevelEvent.currentlyBlinded.contains(p)) { //if ur ilght level is high, u can see
-                        if(!dummyteam.hasPlayer(p)) { //if ur not on torch team now u r
-                            dummyteam.addPlayer(p);
-                            p.sendMessage("adding" + p.getDisplayName() + "to team");
-                            p.sendMessage("vision");
-                        }
+                if (!LightLevelEvent.currentlyBlinded.contains(p)) { //if ur ilght level is high, u can see
+                    if(!dummyteam.hasPlayer(p)) { //if ur not on torch team now u r
+                        dummyteam.addPlayer(p);
+                        Bukkit.getServer().dispatchCommand(Bukkit.getConsoleSender(), "pex user " + p.getName() + " group add Torch");
+                        Bukkit.getServer().dispatchCommand(Bukkit.getConsoleSender(), "tab reload");
+                        p.sendMessage("adding" + p.getDisplayName() + "to team");
+                        p.sendMessage("vision");
                     }
+                }
 
 
 
@@ -95,12 +112,14 @@ public class scoreboard implements Listener{ //Do I have to explain?
                     score5.setScore(3);
 
                 }
-
                 p.setScoreboard(board);
 
             }
-        }, 0, 20);
+        }, 0, 1);
+
+
 
     }
+
 
 }

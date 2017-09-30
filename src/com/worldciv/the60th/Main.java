@@ -3,18 +3,12 @@ package com.worldciv.the60th;
 import com.worldciv.events.player.LightLevelEvent;
 import com.worldciv.events.player.TorchEvent;
 import com.worldciv.events.player.scoreboard;
-import org.bukkit.Bukkit;
-import org.bukkit.ChatColor;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.event.Listener;
-import org.bukkit.permissions.Permission;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.PluginDescriptionFile;
 import org.bukkit.plugin.PluginManager;
 import org.bukkit.plugin.java.JavaPlugin;
-import org.bukkit.scoreboard.Scoreboard;
-import org.bukkit.scoreboard.ScoreboardManager;
-import org.bukkit.scoreboard.Team;
 
 import java.util.logging.Logger;
 
@@ -61,6 +55,7 @@ public class Main extends JavaPlugin implements Listener{
         //pm.addPermission(p);
 
     }
+
 
 
 
