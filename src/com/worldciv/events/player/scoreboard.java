@@ -3,6 +3,7 @@ package com.worldciv.events.player;
 import com.worldciv.the60th.MainTorch;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
+import org.bukkit.GameMode;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
@@ -12,9 +13,12 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerCommandPreprocessEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
+import org.bukkit.potion.PotionEffectType;
 import org.bukkit.scoreboard.*;
 
-public class scoreboard  implements Listener, CommandExecutor { //Do I have to explain?
+import java.util.ArrayList;
+
+public class scoreboard implements Listener, CommandExecutor { //Do I have to explain?
 
     /*          FUTURE NOTE
           If you're making an animation system for the scoreboard:
@@ -25,19 +29,13 @@ public class scoreboard  implements Listener, CommandExecutor { //Do I have to e
 
     */
 
-    //Declaring variables for a dummyboard. This board will be used to ONLY STORE DATA on a SECOND BOARD.
-    ScoreboardManager dummymanager = Bukkit.getScoreboardManager();
-    Scoreboard dummyboard = dummymanager.getNewScoreboard();            //Adjusting thesew values will break the "checkmark" and "x" mark from scoreboards.
-    Team dummyteam = dummyboard.registerNewTeam("dummy vision");
-
-
-    ScoreboardManager dummytogglemanager = Bukkit.getScoreboardManager();
-    Scoreboard dummytogglescoreboard = dummytogglemanager.getNewScoreboard();
-    Team dummytoggleboard = dummytogglescoreboard.registerNewTeam("dummytoggleb");
-
+    //empty scoreboard
     ScoreboardManager emptymanager = Bukkit.getScoreboardManager();
     Scoreboard emptyboard = emptymanager.getNewScoreboard();
 
+    public static ArrayList<Player> toggleblind = new ArrayList<Player>();
+    public static ArrayList<Player> dummyteam = new ArrayList<Player>();
+    public static ArrayList<Player> dummytoggleboard = new ArrayList<Player>();
 
     @EventHandler
     public void onPlayerCommandPreprocess(PlayerCommandPreprocessEvent event) {
@@ -56,25 +54,41 @@ public class scoreboard  implements Listener, CommandExecutor { //Do I have to e
 
     public boolean onCommand(CommandSender sender, Command cmd, String alias, String[] args) {
 
-        if (cmd.getName().equalsIgnoreCase("toggle")) {
+        if (!(sender instanceof Player)) {
+            sender.sendMessage(ChatColor.RED + "You must be a player to access this command!");
 
-            if (!(sender instanceof Player)) {
-                sender.sendMessage(ChatColor.RED + "You must be a player to access this command!");
+        } else {
+            Player p = (Player) sender;
 
-            } else {
-                Player p = (Player) sender;
+            if (cmd.getName().equalsIgnoreCase("toggle")) {
 
-                if (dummytoggleboard.hasPlayer(p)) {
-                    dummytoggleboard.removePlayer(p);
+                if (dummytoggleboard.contains(p)) {
+                    dummytoggleboard.remove(p);
                     p.sendMessage("REMOVED");
+                    setScoreboard(p);
 
-                } else if (!dummytoggleboard.hasPlayer(p)) {
-                    dummytoggleboard.addPlayer(p);
+                } else if (!dummytoggleboard.contains(p)) {
+                    dummytoggleboard.add(p);
                     p.sendMessage("ADDED");
                     p.setScoreboard(emptyboard);
                 }
+            } else if (cmd.getName().equalsIgnoreCase("toggleblind")) {
+                if (!toggleblind.contains(p)) {
+                    toggleblind.add(p);
+                    p.sendMessage("You have night vision!");
+                    if (p.hasPotionEffect(PotionEffectType.BLINDNESS)) {
+                        p.removePotionEffect(PotionEffectType.BLINDNESS);
+                    }
+                    return true;
+                }
+                if (toggleblind.contains(p)) {
+                    toggleblind.remove(p);
+                    p.sendMessage("You have lost your night vision!");
+                    return true;
+                }
             }
         }
+
         return true;
     }
 
@@ -86,8 +100,40 @@ public class scoreboard  implements Listener, CommandExecutor { //Do I have to e
 
         // SCOREBOARD CREATION //
 
+       setScoreboard(p);
+
+    }
+
+    public void updateDummyTeam(Player x) {
+
+        if (LightLevelEvent.currentlyBlinded.contains(x)) { //if ur light level is low with no light
+
+            if (dummyteam.contains(x)) { //if u r in torch dummyteam
+                dummyteam.remove(x); // remove from dummyteam
+                Bukkit.getServer().dispatchCommand(Bukkit.getConsoleSender(), "pex user " + x.getName() + " group remove Torch");
+                Bukkit.getServer().dispatchCommand(Bukkit.getConsoleSender(), "tab reload");
+                x.sendMessage("removing" + x.getDisplayName() + "from team");
+                x.sendMessage("blinded");
+            }
+        }
+
+        if (!LightLevelEvent.currentlyBlinded.contains(x)) { //if ur light level is high, u can see
+            if (!dummyteam.contains(x)) { //if ur not on torch team now u r
+                dummyteam.add(x);
+                Bukkit.getServer().dispatchCommand(Bukkit.getConsoleSender(), "pex user " + x.getName() + " group add Torch");
+                Bukkit.getServer().dispatchCommand(Bukkit.getConsoleSender(), "tab reload");
+                x.sendMessage("adding" + x.getDisplayName() + "to team");
+                x.sendMessage("vision");
+            }
+        }
+
+
+    }
+
+
+    public void setScoreboard(Player x) {
+
         Scoreboard oboard = Bukkit.getScoreboardManager().getNewScoreboard(); //Creates a new scoreboard for every player.
-        Scoreboard emptyboard = Bukkit.getScoreboardManager().getNewScoreboard();
 
         final Objective obj = oboard.registerNewObjective("WorldCiv", "dummy"); //Uses FINAL for same objective. Different objective every time will cause flickering
         obj.setDisplaySlot(DisplaySlot.SIDEBAR); //self explanatory, this objective is present in the sidebar
@@ -112,198 +158,163 @@ public class scoreboard  implements Listener, CommandExecutor { //Do I have to e
         obj.getScore(ChatColor.RED.toString()).setScore(5); //changing value of health. not actual "Health: " string.
         obj.getScore(ChatColor.BLUE.toString()).setScore(3); //changin value of whether blind or not. torch check or x.
 
-        //Creates multiple threads for loop. Saves player in here. This way loops for every differ player. also creates updating.
-        // The loop presented below is used to update the title every half second.
         Bukkit.getServer().getScheduler().scheduleSyncRepeatingTask(MainTorch.plugin, new Runnable() {
-
             int rotation = 1;
 
             @Override
             public void run() {
-                    //COLOR KEY
-                    ChatColor defaultcolor = ChatColor.GRAY;
-                    ChatColor highlight = ChatColor.YELLOW;
-                    String sin = ChatColor.BLACK + ">";
-                    String sout = ChatColor.BLACK + "<";
+                //COLOR KEY
+                ChatColor defaultcolor = ChatColor.GRAY;
+                ChatColor highlight = ChatColor.YELLOW;
+                String sin = ChatColor.BLACK + ">";
+                String sout = ChatColor.BLACK + "<";
 
-                    //this animation is quite a hassle
+                //this animation is quite a hassle
 
-                    //NOTE: don't be dumb like me and actually declare every rotation when rotation++ is a thing
+                //NOTE: don't be dumb like me and actually declare every rotation when rotation++ is a thing
 
-                    if (rotation == 1) {
-                        obj.setDisplayName(defaultcolor + "World Civilization");
-                        rotation = 2;
-                    } else if (rotation == 2) {
-                        obj.setDisplayName(defaultcolor + "World Civilization");
-                        rotation = 3;
-                    } else if (rotation == 3) {
-                        obj.setDisplayName(defaultcolor + "World Civilization");
-                        rotation = 4;
-                    } else if (rotation == 4) {
-                        obj.setDisplayName(highlight + "W" + defaultcolor + "orld Civilization");
-                        rotation = 5;
-                    } else if (rotation == 5) {
-                        obj.setDisplayName(defaultcolor + "W" + highlight + "o" + defaultcolor + "rld Civilization");
-                        rotation = 6;
-                    } else if (rotation == 6) {
-                        obj.setDisplayName(defaultcolor + "Wo" + highlight + "r" + defaultcolor + "ld Civilization");
-                        rotation = 7;
-                    } else if (rotation == 7) {
-                        obj.setDisplayName(defaultcolor + "Wor" + highlight + "l" + defaultcolor + "d Civilization");
-                        rotation = 8;
-                    } else if (rotation == 8) {
-                        obj.setDisplayName(defaultcolor + "Worl" + highlight + "d" + defaultcolor + " Civilization");
-                        rotation = 9;
-                    } else if (rotation == 9) {
-                        obj.setDisplayName(defaultcolor + "World" + highlight + " C" + defaultcolor + "ivilization");
-                        rotation = 10;
-                    } else if (rotation == 10) {
-                        obj.setDisplayName(defaultcolor + "World C" + highlight + "i" + defaultcolor + "vilization");
-                        rotation = 11;
-                    } else if (rotation == 11) {
-                        obj.setDisplayName(defaultcolor + "World Ci" + highlight + "v" + defaultcolor + "ilization");
-                        rotation = 12;
-                    } else if (rotation == 12) {
-                        obj.setDisplayName(defaultcolor + "World Civ" + highlight + "i" + defaultcolor + "lization");
-                        rotation = 13;
-                    } else if (rotation == 13) {
-                        obj.setDisplayName(defaultcolor + "World Civi" + highlight + "l" + defaultcolor + "ization");
-                        rotation = 14;
-                    } else if (rotation == 14) {
-                        obj.setDisplayName(defaultcolor + "World Civil" + highlight + "i" + defaultcolor + "zation");
-                        rotation = 15;
-                    } else if (rotation == 15) {
-                        obj.setDisplayName(defaultcolor + "World Civili" + highlight + "z" + defaultcolor + "ation");
-                        rotation = 16;
-                    } else if (rotation == 16) {
-                        obj.setDisplayName(defaultcolor + "World Civiliz" + highlight + "a" + defaultcolor + "tion");
-                        rotation = 17;
-                    } else if (rotation == 17) {
-                        obj.setDisplayName(defaultcolor + "World Civiliza" + highlight + "t" + defaultcolor + "ion");
-                        rotation = 18;
-                    } else if (rotation == 18) {
-                        obj.setDisplayName(defaultcolor + "World Civilizat" + highlight + "i" + defaultcolor + "on");
-                        rotation = 19;
-                    } else if (rotation == 19) {
-                        obj.setDisplayName(defaultcolor + "World Civilizati" + highlight + "o" + defaultcolor + "n");
-                        rotation = 20;
-                    } else if (rotation == 20) {
-                        obj.setDisplayName(defaultcolor + "World Civilization");
-                        rotation = 21;
-                    } else if (rotation == 21) {
-                        obj.setDisplayName(defaultcolor + "World Civilization");
-                        rotation = 22;
-                    } else if (rotation == 22) {
-                        obj.setDisplayName(sin + defaultcolor + "World Civilization" + sout);
-                        rotation = 23;
-                    } else if (rotation == 23) {
-                        obj.setDisplayName(sin + defaultcolor + " orld Civilizatio " + sout);
-                        rotation = 24;
-                    } else if (rotation == 24) {
-                        obj.setDisplayName(sin + defaultcolor + " rld Civilizati " + sout);
-                        rotation = 25;
-                    } else if (rotation == 25) {
-                        obj.setDisplayName(sin + defaultcolor + " ld Civilizat " + sout);
-                        rotation = 26;
-                    } else if (rotation == 26) {
-                        obj.setDisplayName(sin + defaultcolor + " d Civiliza " + sout);
-                        rotation = 27;
-                    } else if (rotation == 27) {
-                        obj.setDisplayName(sin + defaultcolor + " Civiliz " + sout);
-                        rotation = 28;
-                    } else if (rotation == 28) {
-                        obj.setDisplayName(sin + defaultcolor + " ivili " + sout);
-                        rotation = 29;
-                    } else if (rotation == 29) {
-                        obj.setDisplayName(sin + defaultcolor + " vil " + sout);
-                        rotation = 30;
-                    } else if (rotation == 30) {
-                        obj.setDisplayName(sin + defaultcolor + " i " + sout);
-                        rotation = 31;
-                    } else if (rotation == 31) {
-                        obj.setDisplayName(sin + defaultcolor + "" + sout);
-                        rotation = 32;
-                    } else if (rotation == 32) {
-                        obj.setDisplayName(sout + defaultcolor + "" + sin);
-                        rotation = 33;
-                    } else if (rotation == 33) {
-                        obj.setDisplayName(sout + defaultcolor + " i " + sin);
-                        rotation = 34;
-                    } else if (rotation == 34) {
-                        obj.setDisplayName(sout + defaultcolor + " vil " + sin);
-                        rotation = 35;
-                    } else if (rotation == 35) {
-                        obj.setDisplayName(sout + defaultcolor + " ivili " + sin);
-                        rotation = 36;
-                    } else if (rotation == 36) {
-                        obj.setDisplayName(sout + defaultcolor + " Civiliz " + sin);
-                        rotation = 37;
-                    } else if (rotation == 37) {
-                        obj.setDisplayName(sout + defaultcolor + " d Civiliza " + sin);
-                        rotation = 38;
-                    } else if (rotation == 38) {
-                        obj.setDisplayName(sout + defaultcolor + " ld Civilizat " + sin);
-                        rotation = 39;
-                    } else if (rotation == 39) {
-                        obj.setDisplayName(sout + defaultcolor + " rld Civilizati " + sin);
-                        rotation = 40;
-                    } else if (rotation == 40) {
-                        obj.setDisplayName(sout + defaultcolor + " orld Civilizatio " + sin);
-                        rotation = 41;
-                    } else if (rotation == 41) {
-                        obj.setDisplayName(sout + defaultcolor + "World Civilization" + sin);
-                        rotation = 42;
-                    } else if (rotation == 42) {
-                        obj.setDisplayName(defaultcolor + "World Civilization");
-                        rotation = 1;
-                    }
+                if (rotation == 1) {
+                    obj.setDisplayName(defaultcolor + "World Civilization");
+                    rotation = 2;
+                } else if (rotation == 2) {
+                    obj.setDisplayName(defaultcolor + "World Civilization");
+                    rotation = 3;
+                } else if (rotation == 3) {
+                    obj.setDisplayName(defaultcolor + "World Civilization");
+                    rotation = 4;
+                } else if (rotation == 4) {
+                    obj.setDisplayName(highlight + "W" + defaultcolor + "orld Civilization");
+                    rotation = 5;
+                } else if (rotation == 5) {
+                    obj.setDisplayName(defaultcolor + "W" + highlight + "o" + defaultcolor + "rld Civilization");
+                    rotation = 6;
+                } else if (rotation == 6) {
+                    obj.setDisplayName(defaultcolor + "Wo" + highlight + "r" + defaultcolor + "ld Civilization");
+                    rotation = 7;
+                } else if (rotation == 7) {
+                    obj.setDisplayName(defaultcolor + "Wor" + highlight + "l" + defaultcolor + "d Civilization");
+                    rotation = 8;
+                } else if (rotation == 8) {
+                    obj.setDisplayName(defaultcolor + "Worl" + highlight + "d" + defaultcolor + " Civilization");
+                    rotation = 9;
+                } else if (rotation == 9) {
+                    obj.setDisplayName(defaultcolor + "World" + highlight + " C" + defaultcolor + "ivilization");
+                    rotation = 10;
+                } else if (rotation == 10) {
+                    obj.setDisplayName(defaultcolor + "World C" + highlight + "i" + defaultcolor + "vilization");
+                    rotation = 11;
+                } else if (rotation == 11) {
+                    obj.setDisplayName(defaultcolor + "World Ci" + highlight + "v" + defaultcolor + "ilization");
+                    rotation = 12;
+                } else if (rotation == 12) {
+                    obj.setDisplayName(defaultcolor + "World Civ" + highlight + "i" + defaultcolor + "lization");
+                    rotation = 13;
+                } else if (rotation == 13) {
+                    obj.setDisplayName(defaultcolor + "World Civi" + highlight + "l" + defaultcolor + "ization");
+                    rotation = 14;
+                } else if (rotation == 14) {
+                    obj.setDisplayName(defaultcolor + "World Civil" + highlight + "i" + defaultcolor + "zation");
+                    rotation = 15;
+                } else if (rotation == 15) {
+                    obj.setDisplayName(defaultcolor + "World Civili" + highlight + "z" + defaultcolor + "ation");
+                    rotation = 16;
+                } else if (rotation == 16) {
+                    obj.setDisplayName(defaultcolor + "World Civiliz" + highlight + "a" + defaultcolor + "tion");
+                    rotation = 17;
+                } else if (rotation == 17) {
+                    obj.setDisplayName(defaultcolor + "World Civiliza" + highlight + "t" + defaultcolor + "ion");
+                    rotation = 18;
+                } else if (rotation == 18) {
+                    obj.setDisplayName(defaultcolor + "World Civilizat" + highlight + "i" + defaultcolor + "on");
+                    rotation = 19;
+                } else if (rotation == 19) {
+                    obj.setDisplayName(defaultcolor + "World Civilizati" + highlight + "o" + defaultcolor + "n");
+                    rotation = 20;
+                } else if (rotation == 20) {
+                    obj.setDisplayName(defaultcolor + "World Civilization");
+                    rotation = 21;
+                } else if (rotation == 21) {
+                    obj.setDisplayName(defaultcolor + "World Civilization");
+                    rotation = 22;
+                } else if (rotation == 22) {
+                    obj.setDisplayName(sin + defaultcolor + "World Civilization" + sout);
+                    rotation = 23;
+                } else if (rotation == 23) {
+                    obj.setDisplayName(sin + defaultcolor + " orld Civilizatio " + sout);
+                    rotation = 24;
+                } else if (rotation == 24) {
+                    obj.setDisplayName(sin + defaultcolor + " rld Civilizati " + sout);
+                    rotation = 25;
+                } else if (rotation == 25) {
+                    obj.setDisplayName(sin + defaultcolor + " ld Civilizat " + sout);
+                    rotation = 26;
+                } else if (rotation == 26) {
+                    obj.setDisplayName(sin + defaultcolor + " d Civiliza " + sout);
+                    rotation = 27;
+                } else if (rotation == 27) {
+                    obj.setDisplayName(sin + defaultcolor + " Civiliz " + sout);
+                    rotation = 28;
+                } else if (rotation == 28) {
+                    obj.setDisplayName(sin + defaultcolor + " ivili " + sout);
+                    rotation = 29;
+                } else if (rotation == 29) {
+                    obj.setDisplayName(sin + defaultcolor + " vil " + sout);
+                    rotation = 30;
+                } else if (rotation == 30) {
+                    obj.setDisplayName(sin + defaultcolor + " i " + sout);
+                    rotation = 31;
+                } else if (rotation == 31) {
+                    obj.setDisplayName(sin + defaultcolor + "" + sout);
+                    rotation = 32;
+                } else if (rotation == 32) {
+                    obj.setDisplayName(sout + defaultcolor + "" + sin);
+                    rotation = 33;
+                } else if (rotation == 33) {
+                    obj.setDisplayName(sout + defaultcolor + " i " + sin);
+                    rotation = 34;
+                } else if (rotation == 34) {
+                    obj.setDisplayName(sout + defaultcolor + " vil " + sin);
+                    rotation = 35;
+                } else if (rotation == 35) {
+                    obj.setDisplayName(sout + defaultcolor + " ivili " + sin);
+                    rotation = 36;
+                } else if (rotation == 36) {
+                    obj.setDisplayName(sout + defaultcolor + " Civiliz " + sin);
+                    rotation = 37;
+                } else if (rotation == 37) {
+                    obj.setDisplayName(sout + defaultcolor + " d Civiliza " + sin);
+                    rotation = 38;
+                } else if (rotation == 38) {
+                    obj.setDisplayName(sout + defaultcolor + " ld Civilizat " + sin);
+                    rotation = 39;
+                } else if (rotation == 39) {
+                    obj.setDisplayName(sout + defaultcolor + " rld Civilizati " + sin);
+                    rotation = 40;
+                } else if (rotation == 40) {
+                    obj.setDisplayName(sout + defaultcolor + " orld Civilizatio " + sin);
+                    rotation = 41;
+                } else if (rotation == 41) {
+                    obj.setDisplayName(sout + defaultcolor + "World Civilization" + sin);
+                    rotation = 42;
+                } else if (rotation == 42) {
+                    obj.setDisplayName(defaultcolor + "World Civilization");
+                    rotation = 1;
                 }
-
+            }
 
         }, 0, 3);
-        //The loop presented below is used to update all scores per tick. every 0.05 seconds.
-        Bukkit.getServer().getScheduler().scheduleSyncRepeatingTask(MainTorch.plugin, new Runnable() {
 
+        Bukkit.getServer().getScheduler().scheduleSyncRepeatingTask(MainTorch.plugin, new Runnable() {
             @Override
             public void run() {
-
-                updateScoreboard(p, obj, healthteam, torchteam); //update every tick
-
+                updateScoreboard(x, obj, healthteam, torchteam); //update every tick
             }
 
         }, 0, 1);
 
-        p.setScoreboard(oboard);
+        x.setScoreboard(oboard);
 
     }
-
-    public void updateDummyTeam(Player x) {
-
-        if (LightLevelEvent.currentlyBlinded.contains(x)) { //if ur light level is low with no light
-
-            if (dummyteam.hasPlayer(x)) { //if u r in torch dummyteam
-                dummyteam.removePlayer(x); // remove from dummyteam
-                Bukkit.getServer().dispatchCommand(Bukkit.getConsoleSender(), "pex user " + x.getName() + " group remove Torch");
-                Bukkit.getServer().dispatchCommand(Bukkit.getConsoleSender(), "tab reload");
-                x.sendMessage("removing" + x.getDisplayName() + "from team");
-                x.sendMessage("blinded");
-            }
-        }
-
-        if (!LightLevelEvent.currentlyBlinded.contains(x)) { //if ur light level is high, u can see
-            if (!dummyteam.hasPlayer(x)) { //if ur not on torch team now u r
-                dummyteam.addPlayer(x);
-                Bukkit.getServer().dispatchCommand(Bukkit.getConsoleSender(), "pex user " + x.getName() + " group add Torch");
-                Bukkit.getServer().dispatchCommand(Bukkit.getConsoleSender(), "tab reload");
-                x.sendMessage("adding" + x.getDisplayName() + "to team");
-                x.sendMessage("vision");
-            }
-        }
-
-
-    }
-
-    
 
     public void updateScoreboard(Player x, Objective obj, Team healthteam, Team torchteam) {
 
@@ -332,19 +343,20 @@ public class scoreboard  implements Listener, CommandExecutor { //Do I have to e
         //blankscore3 | line 4
 
         // SCORE TO HAVE ✓ OR ✗ MARK
-        if (dummyteam.hasPlayer(x)) {
-            torchteam.setPrefix(ChatColor.RED + "Torch [T]:" + ChatColor.BLUE + " ✓");
 
-        } else if (!dummyteam.hasPlayer(x)) {
-            torchteam.setPrefix(ChatColor.RED + "Torch [T]:" + ChatColor.BLUE + " ✗");
+        if (x.getGameMode() == GameMode.CREATIVE || toggleblind.contains(x)) {
+            torchteam.setPrefix(ChatColor.YELLOW + "TORCH BYPASS");
+        } else {
+
+            if (dummyteam.contains(x)) {
+                torchteam.setPrefix(ChatColor.RED + "Torch [T]:" + ChatColor.BLUE + " ✓");
+
+            } else if (!dummyteam.contains(x)) {
+                torchteam.setPrefix(ChatColor.RED + "Torch [T]:" + ChatColor.BLUE + " ✗");
+            }
         }
     }
-
-
-    public void updateSidebarTitle(Objective obj) {
-        //for future animation style :)
-    }
-
+    
 }
 
 
