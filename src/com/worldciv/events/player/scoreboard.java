@@ -1,7 +1,6 @@
 package com.worldciv.events.player;
 
 import com.worldciv.the60th.MainTorch;
-import javafx.scene.effect.Light;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.GameMode;
@@ -10,6 +9,8 @@ import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.command.ConsoleCommandSender;
+import org.bukkit.entity.Entity;
+import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -20,15 +21,22 @@ import org.bukkit.potion.PotionEffectType;
 import org.bukkit.scoreboard.*;
 
 import java.util.ArrayList;
+import java.util.List;
 
 public class scoreboard implements Listener, CommandExecutor { //Do I have to explain?
 
-    /*          FUTURE NOTE
-          If you're making an animation system for the scoreboard:
-            - create a toggle system
-            - use same system with if statements
-            - do not change setscores. you have 99 values. Use them.
-            - think harder
+    /*          NOTES [10/2/2017]
+
+            - find new way for prefix, use players instead? too many combinations in groups.
+                  Pros for Group Prefix:
+                        - You can set permissions for a group in considered "Vision" group.
+                  Pros for User Prefix:
+                        - LESSS groups and less switching. less pain for pex :(.
+            - offhand support ++!
+            -  //postponed-for-now// know who you are lighting! found way somewhere in comments below in updatedummyteams
+            - another bug 60 needs to fix or i may need help. player double casts when you are lighting someone? because 2 players in range?
+            - fix /pl etc. need substring methods. ask 60. atm as of now "/? 4" goes through whereas /? does not.
+            - TAB plugin feature was updated. hopefully fixed bug.
 
     */
 
@@ -37,7 +45,7 @@ public class scoreboard implements Listener, CommandExecutor { //Do I have to ex
     Scoreboard emptyboard = emptymanager.getNewScoreboard();
 
     public static ArrayList<Player> toggleblind = new ArrayList<Player>();
-    public static ArrayList<Player> dummyteam = new ArrayList<Player>();
+    public static ArrayList<Player> visionteam = new ArrayList<Player>();
     public static ArrayList<Player> dummytoggleboard = new ArrayList<Player>();
 
 
@@ -68,18 +76,22 @@ public class scoreboard implements Listener, CommandExecutor { //Do I have to ex
 
                 if (dummytoggleboard.contains(p)) {
                     dummytoggleboard.remove(p);
-                    p.sendMessage("REMOVED");
+                    p.sendMessage(ChatColor.GOLD + "[World-Civ]" + ChatColor.GRAY + " The scoreboard has been enabled!");
                     setScoreboard(p);
 
                 } else if (!dummytoggleboard.contains(p)) {
                     dummytoggleboard.add(p);
-                    p.sendMessage("ADDED");
+                    p.sendMessage(ChatColor.GOLD + "[World-Civ]" + ChatColor.GRAY + " The scoreboard has been disabled!");
                     p.setScoreboard(emptyboard);
                 }
             } else if (cmd.getName().equalsIgnoreCase("toggleblind")) {
+                if (!sender.hasPermission("worldciv.toggleblind")) {
+                    p.sendMessage(ChatColor.GOLD + "[World-Civ]" + ChatColor.GRAY + " This command is only allowed for staff. If you believe this is an error, ask staff to provide you the" + ChatColor.AQUA + " worldciv.toggleblind" + ChatColor.GRAY + " permission.");
+                    return true;
+                }
                 if (!toggleblind.contains(p)) {
                     toggleblind.add(p);
-                    p.sendMessage("You have night vision!");
+                    p.sendMessage(ChatColor.GOLD + "[World-Civ]" + ChatColor.GRAY + " You have enabled " + ChatColor.YELLOW + "vision bypass.");
                     if (p.hasPotionEffect(PotionEffectType.BLINDNESS)) {
                         p.removePotionEffect(PotionEffectType.BLINDNESS);
                     }
@@ -87,7 +99,7 @@ public class scoreboard implements Listener, CommandExecutor { //Do I have to ex
                 }
                 if (toggleblind.contains(p)) {
                     toggleblind.remove(p);
-                    p.sendMessage("You have lost your night vision!");
+                    p.sendMessage(ChatColor.GOLD + "[World-Civ]" + ChatColor.GRAY + " You have disabled " + ChatColor.YELLOW + "vision bypass.");
                     return true;
                 }
             }
@@ -113,35 +125,64 @@ public class scoreboard implements Listener, CommandExecutor { //Do I have to ex
 
     }
 
-    public void updateDummyTeam(Player x) {
+    public void updateVisionTeam(Player x) {
 
-        Location location = x.getLocation();
+        Location location = x.getLocation(); //player loc variables
         Location vision = new Location(location.getWorld(), location.getX(), location.getY() + 1, location.getZ());
         int LightLevel = vision.getBlock().getLightLevel();
 
-        if (LightLevelEvent.currentlyBlinded.contains(x)) { //if ur light level is low with no light
+        List<Entity> entitylist = x.getNearbyEntities(5, 5, 5); //getting radius 5
+        for (int i = 0; i < entitylist.size(); i++) { // for all that are in vision effect
 
-            if (dummyteam.contains(x)) { //if u r in torch dummyteam
-                if(LightLevel <= 5 || !TorchEvent.holdingLight.contains(x) ) {
+            if (entitylist.get(i).getType() == EntityType.PLAYER) { //for those that are players
 
-                    dummyteam.remove(x); // remove from dummyteam
-                    Bukkit.getServer().dispatchCommand(Bukkit.getConsoleSender(), "pex user " + x.getName() + " group remove Torch");
-                    Bukkit.getServer().dispatchCommand(Bukkit.getConsoleSender(), "tab reload");
-                    x.sendMessage("removing" + x.getDisplayName() + "from team");
-                    x.sendMessage("blinded");
+                if (TorchEvent.holdingLight.contains(x) && !visionteam.contains(x)) { //if you are being lit and you are already not in vision.
+
+                    entitylist.get(i).sendMessage(ChatColor.GOLD + "[World-Civ]" + ChatColor.GRAY + " You have been provided vision by " + ChatColor.AQUA + x.getDisplayName());
                 }
 
+                if (TorchEvent.holdingLight.contains((Player) entitylist.get(i))) { //BELOW THIS (PLAYER) X BECOMES PERSON BEING LIT
+
+                    //    entitylist.get(i).sendMessage(x.getDisplayName()); WILL TELL YOU (ALL) WHO YOU (HOLDER OF TORCH) ARE LIGHTING HYPE example: KotoriXIII (me): You are lighting (all players)
+
+                    if (!visionteam.contains(x)) {
+
+                        Bukkit.getServer().dispatchCommand(Bukkit.getConsoleSender(), "pex user " + x.getName() + " group add Torch"); //<3 the tab
+                        Bukkit.getServer().dispatchCommand(Bukkit.getConsoleSender(), "tab reload");
+
+                        visionteam.add(x); //ADDS TO TEAM AND VISION FROM AOE
+                    }
+                    return; //CANCELS UNNECESSARY SPAM FROM BELOW
+                }
             }
         }
 
+
+        if (LightLevelEvent.currentlyBlinded.contains(x)) { //if ur light level is low with no light
+
+            if (visionteam.contains(x)) { //if u r in torch visionteam
+
+                visionteam.remove(x); // remove from visionteam
+                Bukkit.getServer().dispatchCommand(Bukkit.getConsoleSender(), "pex user " + x.getName() + " group remove Torch"); //<3 the tab
+                Bukkit.getServer().dispatchCommand(Bukkit.getConsoleSender(), "tab reload");
+
+                //YOU HAVE BEEN BLINDED
+
+            }
+
+        }
+
+
         if (!LightLevelEvent.currentlyBlinded.contains(x)) { //if ur light level is high, u can see
-            if (!dummyteam.contains(x)) { //if ur not on torch team now u r
+            if (!visionteam.contains(x)) { //if ur not on torch team now u r
                 if (LightLevel > 5 || TorchEvent.holdingLight.contains(x)) {
-                    dummyteam.add(x);
+
+                    visionteam.add(x);
                     Bukkit.getServer().dispatchCommand(Bukkit.getConsoleSender(), "pex user " + x.getName() + " group add Torch");
                     Bukkit.getServer().dispatchCommand(Bukkit.getConsoleSender(), "tab reload");
-                    x.sendMessage("adding" + x.getDisplayName() + "to team");
-                    x.sendMessage("vision");
+
+                    //YOU HAVE EYES NOW, YAY YOU CAN SEE
+
                 }
             }
         }
@@ -175,11 +216,11 @@ public class scoreboard implements Listener, CommandExecutor { //Do I have to ex
 
         //Create static placement of scores. (what line on sidebar)
         obj.getScore(ChatColor.RED.toString()).setScore(5); //changing value of health. not actual "Health: " string.
-        obj.getScore(ChatColor.BLUE.toString()).setScore(3); //changin value of whether blind or not. torch check or x.
+        obj.getScore(ChatColor.BLUE.toString()).setScore(3); //changing value of whether blind or not. torch check or x.
 
+        //The loop under me plays the animated display title. try not to create too many loops yo.
         Bukkit.getServer().getScheduler().scheduleSyncRepeatingTask(MainTorch.plugin, new Runnable() {
             int rotation = 1;
-
             @Override
             public void run() {
                 //COLOR KEY
@@ -323,13 +364,14 @@ public class scoreboard implements Listener, CommandExecutor { //Do I have to ex
 
         }, 0, 3);
 
+        //The loop under me updated the scoreboard every tick.
         Bukkit.getServer().getScheduler().scheduleSyncRepeatingTask(MainTorch.plugin, new Runnable() {
             @Override
             public void run() {
                 updateScoreboard(x, obj, healthteam, torchteam); //update every tick
             }
 
-        }, 0, 1);
+        }, 0, 20);
 
         x.setScoreboard(oboard);
 
@@ -342,7 +384,8 @@ public class scoreboard implements Listener, CommandExecutor { //Do I have to ex
 
         // obj.setDisplayName("World Civilization"); //idea for future: create animated title (look down for updateSidebarTitle). create a function to make things more neat.
 
-        updateDummyTeam(x); //has to be called before checking if you are blind or not. checkmark or x.
+        updateVisionTeam(x); //has to be called before checking if you are blind or not. checkmark or x.
+        LightLevelEvent.updateLightLevelEvent(x);
 
         //blankscore
 
@@ -368,11 +411,11 @@ public class scoreboard implements Listener, CommandExecutor { //Do I have to ex
             torchteam.setSuffix(ChatColor.RESET + "");
         } else {
 
-            if (dummyteam.contains(x)) {
+            if (visionteam.contains(x)) {
                 torchteam.setPrefix(ChatColor.YELLOW + "Vision [V]:");
                 torchteam.setSuffix(ChatColor.DARK_GREEN + "" + ChatColor.BOLD + " ✓");
 
-            } else if (!dummyteam.contains(x)) {
+            } else if (!visionteam.contains(x)) {
                 torchteam.setPrefix(ChatColor.YELLOW + "Vision [V]:");
                 torchteam.setSuffix(ChatColor.RED + " ✗");
             }
