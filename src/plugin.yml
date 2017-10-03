@@ -1,3 +1,10 @@
 name: World-Civ Demo
-main: com.worldciv.the60th.Main
+main: com.worldciv.the60th.MainTorch
 version: 1.0
+commands:
+  toggle:
+    description:
+    usage:
+  toggleblind:
+    description:
+    usage:

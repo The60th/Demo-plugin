@@ -12,7 +12,7 @@ import org.bukkit.plugin.java.JavaPlugin;
 
 import java.util.logging.Logger;
 
-public class Main extends JavaPlugin implements Listener{
+public class MainTorch extends JavaPlugin implements Listener{
     FileConfiguration config = getConfig();
     public static Plugin plugin;
 
@@ -28,13 +28,13 @@ public class Main extends JavaPlugin implements Listener{
                 + "has successfully enabled. The current version is: "
                 + pdfFile.getVersion());
         registerEvents();
-        //team.setPrefix("Torch");
-        //System.out.print(team.getName());
-       // System.out.print(team.getPrefix());
+        getCommand("toggle").setExecutor(new scoreboard());
+        getCommand("toggleblind").setExecutor(new scoreboard());
 
     }
 
     public void onDisable() {
+        plugin = null;
         PluginDescriptionFile pdfFile = getDescription();
         Logger logger = Logger.getLogger("Minecraft");
         logger.info(pdfFile.getName() + "has successfully disabled.");
@@ -49,6 +49,8 @@ public class Main extends JavaPlugin implements Listener{
         pm.registerEvents(new TorchEvent(), this);
         pm.registerEvents(new scoreboard(), this);
     }
+
+
     private void registerPermissons(){
         //PluginManager pm = getServer().getPluginManager();
         //Permission p = new Permission("Permisson name");

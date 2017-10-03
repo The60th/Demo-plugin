@@ -13,6 +13,7 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerCommandPreprocessEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
+import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.potion.PotionEffectType;
 import org.bukkit.scoreboard.*;
 
@@ -36,6 +37,7 @@ public class scoreboard implements Listener, CommandExecutor { //Do I have to ex
     public static ArrayList<Player> toggleblind = new ArrayList<Player>();
     public static ArrayList<Player> dummyteam = new ArrayList<Player>();
     public static ArrayList<Player> dummytoggleboard = new ArrayList<Player>();
+
 
     @EventHandler
     public void onPlayerCommandPreprocess(PlayerCommandPreprocessEvent event) {
@@ -92,39 +94,49 @@ public class scoreboard implements Listener, CommandExecutor { //Do I have to ex
         return true;
     }
 
+    @EventHandler
+    public void onPlayerQuit(PlayerQuitEvent e) {
+        Player p = e.getPlayer();
+
+    }
+
     @SuppressWarnings("deprecation")
     @EventHandler
     public void PlayerJoin(PlayerJoinEvent e) {
-
         Player p = e.getPlayer(); //player triggering event
 
         // SCOREBOARD CREATION //
 
-       setScoreboard(p);
+        setScoreboard(p);
 
     }
 
     public void updateDummyTeam(Player x) {
 
+
         if (LightLevelEvent.currentlyBlinded.contains(x)) { //if ur light level is low with no light
 
             if (dummyteam.contains(x)) { //if u r in torch dummyteam
+
                 dummyteam.remove(x); // remove from dummyteam
                 Bukkit.getServer().dispatchCommand(Bukkit.getConsoleSender(), "pex user " + x.getName() + " group remove Torch");
                 Bukkit.getServer().dispatchCommand(Bukkit.getConsoleSender(), "tab reload");
                 x.sendMessage("removing" + x.getDisplayName() + "from team");
                 x.sendMessage("blinded");
+
             }
         }
 
         if (!LightLevelEvent.currentlyBlinded.contains(x)) { //if ur light level is high, u can see
             if (!dummyteam.contains(x)) { //if ur not on torch team now u r
-                dummyteam.add(x);
-                Bukkit.getServer().dispatchCommand(Bukkit.getConsoleSender(), "pex user " + x.getName() + " group add Torch");
-                Bukkit.getServer().dispatchCommand(Bukkit.getConsoleSender(), "tab reload");
-                x.sendMessage("adding" + x.getDisplayName() + "to team");
-                x.sendMessage("vision");
-            }
+
+                    dummyteam.add(x);
+                    Bukkit.getServer().dispatchCommand(Bukkit.getConsoleSender(), "pex user " + x.getName() + " group add Torch");
+                    Bukkit.getServer().dispatchCommand(Bukkit.getConsoleSender(), "tab reload");
+                    x.sendMessage("adding" + x.getDisplayName() + "to team");
+                    x.sendMessage("vision");
+                }
+
         }
 
 
@@ -345,18 +357,21 @@ public class scoreboard implements Listener, CommandExecutor { //Do I have to ex
         // SCORE TO HAVE ✓ OR ✗ MARK
 
         if (x.getGameMode() == GameMode.CREATIVE || toggleblind.contains(x)) {
-            torchteam.setPrefix(ChatColor.YELLOW + "TORCH BYPASS");
+            torchteam.setPrefix(ChatColor.YELLOW + "VISION BYPASS");
+            torchteam.setSuffix(ChatColor.RESET + "");
         } else {
 
             if (dummyteam.contains(x)) {
-                torchteam.setPrefix(ChatColor.RED + "Torch [T]:" + ChatColor.BLUE + " ✓");
+                torchteam.setPrefix(ChatColor.YELLOW + "Vision [V]:");
+                torchteam.setSuffix(ChatColor.DARK_GREEN + "" + ChatColor.BOLD + " ✓");
 
             } else if (!dummyteam.contains(x)) {
-                torchteam.setPrefix(ChatColor.RED + "Torch [T]:" + ChatColor.BLUE + " ✗");
+                torchteam.setPrefix(ChatColor.YELLOW + "Vision [V]:");
+                torchteam.setSuffix(ChatColor.RED + " ✗");
             }
         }
     }
-    
+
 }
 
 
