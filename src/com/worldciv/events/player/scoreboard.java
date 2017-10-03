@@ -1,9 +1,11 @@
 package com.worldciv.events.player;
 
 import com.worldciv.the60th.MainTorch;
+import javafx.scene.effect.Light;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.GameMode;
+import org.bukkit.Location;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
@@ -113,30 +115,35 @@ public class scoreboard implements Listener, CommandExecutor { //Do I have to ex
 
     public void updateDummyTeam(Player x) {
 
+        Location location = x.getLocation();
+        Location vision = new Location(location.getWorld(), location.getX(), location.getY() + 1, location.getZ());
+        int LightLevel = vision.getBlock().getLightLevel();
 
         if (LightLevelEvent.currentlyBlinded.contains(x)) { //if ur light level is low with no light
 
             if (dummyteam.contains(x)) { //if u r in torch dummyteam
+                if(LightLevel <= 5 || !TorchEvent.holdingLight.contains(x) ) {
 
-                dummyteam.remove(x); // remove from dummyteam
-                Bukkit.getServer().dispatchCommand(Bukkit.getConsoleSender(), "pex user " + x.getName() + " group remove Torch");
-                Bukkit.getServer().dispatchCommand(Bukkit.getConsoleSender(), "tab reload");
-                x.sendMessage("removing" + x.getDisplayName() + "from team");
-                x.sendMessage("blinded");
+                    dummyteam.remove(x); // remove from dummyteam
+                    Bukkit.getServer().dispatchCommand(Bukkit.getConsoleSender(), "pex user " + x.getName() + " group remove Torch");
+                    Bukkit.getServer().dispatchCommand(Bukkit.getConsoleSender(), "tab reload");
+                    x.sendMessage("removing" + x.getDisplayName() + "from team");
+                    x.sendMessage("blinded");
+                }
 
             }
         }
 
         if (!LightLevelEvent.currentlyBlinded.contains(x)) { //if ur light level is high, u can see
             if (!dummyteam.contains(x)) { //if ur not on torch team now u r
-
+                if (LightLevel > 5 || TorchEvent.holdingLight.contains(x)) {
                     dummyteam.add(x);
                     Bukkit.getServer().dispatchCommand(Bukkit.getConsoleSender(), "pex user " + x.getName() + " group add Torch");
                     Bukkit.getServer().dispatchCommand(Bukkit.getConsoleSender(), "tab reload");
                     x.sendMessage("adding" + x.getDisplayName() + "to team");
                     x.sendMessage("vision");
                 }
-
+            }
         }
 
 
