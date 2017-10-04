@@ -43,8 +43,7 @@ public class scoreboard implements Listener, CommandExecutor {
      need-to-do:
     - reset pex/tab configs from teams (not crucially needed, do once decided to move from Torch groups to suffixes)
     - make a sick blankscore underlining name of server??? look at examples online
-    - scrolling string instead? releasing top news / patches / events /
-    - change displayanimat (d) to sbanimation (sba/anim)
+    - scrolling string instead? releasing top news / patches / events
     - config for news
     - anvil stuff yeahh!
 
@@ -217,7 +216,7 @@ public class scoreboard implements Listener, CommandExecutor {
 
                 if (LightLevelEvent.holdingLight.contains(x) && !visionteam.contains(x)) { //if you are being lit and you are already not in vision.
 
-                    if(!togglevisionmessage.contains((Player)entitylist.get(i)))
+                    if(!togglevisionmessage.contains(entitylist.get(i)))
                     entitylist.get(i).sendMessage(worldciv + ChatColor.GRAY + " You have been provided vision by " + ChatColor.AQUA + x.getDisplayName());
 
                 }
