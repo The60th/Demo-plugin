@@ -3,7 +3,11 @@ package com.worldciv.the60th;
 import com.worldciv.events.player.LightLevelEvent;
 import com.worldciv.events.player.TorchEvent;
 import com.worldciv.events.player.scoreboard;
+import org.bukkit.Bukkit;
+import org.bukkit.ChatColor;
+import org.bukkit.Server;
 import org.bukkit.configuration.file.FileConfiguration;
+import org.bukkit.entity.Player;
 import org.bukkit.event.Listener;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.PluginDescriptionFile;
@@ -20,6 +24,9 @@ public class MainTorch extends JavaPlugin implements Listener{
     //public static Scoreboard board = manager.getNewScoreboard();
     //public static Team team = board.registerNewTeam("holdingLight");
     public void onEnable() {
+
+
+
         plugin = this;
         PluginDescriptionFile pdfFile = this.getDescription();
         Logger logger = Logger.getLogger("Minecraft");
@@ -31,7 +38,34 @@ public class MainTorch extends JavaPlugin implements Listener{
         getCommand("toggle").setExecutor(new scoreboard());
         getCommand("toggleblind").setExecutor(new scoreboard());
 
+        Bukkit.getServer().getScheduler().scheduleSyncRepeatingTask(MainTorch.plugin, new Runnable() {
+            public void run(){
+                Server server = getServer();
+                long time = server.getWorld("world").getTime();
+
+                if(time == 13200){
+                    Bukkit.broadcastMessage(ChatColor.GOLD + "[World-Civ]" + ChatColor.GRAY + " It's getting dark...");
+                } else if (time == 22490){
+                    Bukkit.broadcastMessage(ChatColor.GOLD + "[World-Civ]" + ChatColor.GRAY + " It seems morning is arising.");
+
+                }
+            }
+        }, 0, 1);
+
+        for (Player p : Bukkit.getOnlinePlayers()){
+            p.setScoreboard(Bukkit.getScoreboardManager().getNewScoreboard()); //REMOVES CURRENT SB if at all any.
+            scoreboard.setScoreboard(p);
+
+
+        }
+
+        Bukkit.broadcastMessage(ChatColor.GOLD + "[World-Civ]" + ChatColor.GRAY + " Refreshing plugin data.");
+
+
+
     }
+
+
 
     public void onDisable() {
         plugin = null;
@@ -57,6 +91,8 @@ public class MainTorch extends JavaPlugin implements Listener{
         //pm.addPermission(p);
 
     }
+
+
 
 
 

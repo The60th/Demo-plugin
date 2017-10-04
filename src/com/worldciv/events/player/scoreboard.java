@@ -1,10 +1,7 @@
 package com.worldciv.events.player;
 
 import com.worldciv.the60th.MainTorch;
-import org.bukkit.Bukkit;
-import org.bukkit.ChatColor;
-import org.bukkit.GameMode;
-import org.bukkit.Location;
+import org.bukkit.*;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
@@ -37,21 +34,13 @@ public class scoreboard implements Listener, CommandExecutor {
 
      -  //postponed-for-now// know who you are lighting! found way somewhere in comments below in updatevisionTeam. perfect for dungeons.
 
-
-
      BUG
      - another bug 60 needs to fix or i may need help. player double casts when you are lighting someone? because 2 players in range? test with 3?
      -offhand support critically needed
-
-
-
-     FIXES
-     - TAB plugin feature was updated. hopefully fixed bug.
-
-
+     
      need-to-do:
     -reset pex/tab configs from teams (not crucially needed, do once decided to move from Torch groups to suffixes)
-    */
+     */
 
 
     //empty scoreboard
@@ -62,7 +51,7 @@ public class scoreboard implements Listener, CommandExecutor {
     public static ArrayList<Player> visionteam = new ArrayList<Player>();
     public static ArrayList<Player> dummytoggleboard = new ArrayList<Player>();
     public static ArrayList<Player> toggledisplay = new ArrayList<Player>();
-
+    public static ArrayList<Player> togglevisionmessage = new ArrayList<Player>();
 
     @EventHandler
     public void onPlayerCommandPreprocess(PlayerCommandPreprocessEvent event) {
@@ -96,7 +85,7 @@ public class scoreboard implements Listener, CommandExecutor {
                 }
 
                 else if (args[0].equalsIgnoreCase("help")) {
-                    p.sendMessage(ChatColor.GOLD + "[World-Civ]" + ChatColor.GRAY + " The toggle commands are:" + ChatColor.AQUA + " scoreboard (sb), display (d)");
+                    p.sendMessage(ChatColor.GOLD + "[World-Civ]" + ChatColor.GRAY + " The toggle commands are:" + ChatColor.AQUA + " scoreboard (sb), display (d), visionmessages (vm/vms)");
 
                     if(sender.hasPermission("worldciv.blind")){
                         p.sendMessage(ChatColor.GOLD + "[World-Civ]" + ChatColor.GRAY + " The staff toggle commands are (only staff can see this):" + ChatColor.AQUA + " blind (b)");
@@ -152,8 +141,22 @@ public class scoreboard implements Listener, CommandExecutor {
                     }
                 }
 
+                else if (args[0].equalsIgnoreCase("visionessages") || args[0].equalsIgnoreCase("vm") || args[0].equalsIgnoreCase("vms")) {
+                    if (togglevisionmessage.contains(p)) {
+                        togglevisionmessage.remove(p);
+                        p.sendMessage(ChatColor.GOLD + "[World-Civ]" + ChatColor.GRAY + " The vision message notifications have been enabled!");
+                        return true;
+
+                    } else if (!togglevisionmessage.contains(p)) {
+                        togglevisionmessage.add(p);
+                        p.sendMessage(ChatColor.GOLD + "[World-Civ]" + ChatColor.GRAY + " The vision message notifications have been disabled!");
+
+                        return true;
+                    }
+                }
+
                 else {
-                    p.sendMessage(ChatColor.GOLD + "[World-Civ]" + ChatColor.RED + " Too many arguments! Use /toggle help. Example: /toggle sb");
+                    p.sendMessage(ChatColor.GOLD + "[World-Civ]" + ChatColor.RED + " Not a valid argument! Use /toggle help. Example: /toggle sb");
                     return true;
                 }
             }
@@ -178,10 +181,10 @@ public class scoreboard implements Listener, CommandExecutor {
 
     }
 
-    public void updateVisionTeam(Player x) {
+    public static void updateVisionTeam(Player x) {
 
         Location location = x.getLocation(); //player loc variables
-        Location vision = new Location(location.getWorld(), location.getX(), location.getY() + 1, location.getZ());
+        Location vision = new Location(location.getWorld(), location.getX(), location.getY() + 1.62, location.getZ());
         int LightLevel = vision.getBlock().getLightLevel();
 
         List<Entity> entitylist = x.getNearbyEntities(5, 5, 5); //getting radius 5
@@ -191,21 +194,26 @@ public class scoreboard implements Listener, CommandExecutor {
 
                 if (TorchEvent.holdingLight.contains(x) && !visionteam.contains(x)) { //if you are being lit and you are already not in vision.
 
+                    if(!togglevisionmessage.contains(entitylist.get(i)))
                     entitylist.get(i).sendMessage(ChatColor.GOLD + "[World-Civ]" + ChatColor.GRAY + " You have been provided vision by " + ChatColor.AQUA + x.getDisplayName());
+
                 }
 
                 if (TorchEvent.holdingLight.contains((Player) entitylist.get(i))) { //BELOW THIS (PLAYER) X BECOMES PERSON BEING LIT
 
-                    //    entitylist.get(i).sendMessage(x.getDisplayName()); WILL TELL YOU (ALL) WHO YOU (HOLDER OF TORCH) ARE LIGHTING HYPE example: KotoriXIII (me): You are lighting (all players)
+                    if (vision.getBlock().getType() != Material.WATER || vision.getBlock().getType() != Material.STATIONARY_WATER) {
+                        //    entitylist.get(i).sendMessage(x.getDisplayName()); WILL TELL YOU (ALL) WHO YOU (HOLDER OF TORCH) ARE LIGHTING HYPE example: KotoriXIII (me): You are lighting (all players)
 
-                    if (!visionteam.contains(x)) {
+                        if (!visionteam.contains(x)) {
 
-                        Bukkit.getServer().dispatchCommand(Bukkit.getConsoleSender(), "pex user " + x.getName() + " group add Torch"); //<3 the tab
-                        Bukkit.getServer().dispatchCommand(Bukkit.getConsoleSender(), "tab reload");
+                            Bukkit.getServer().dispatchCommand(Bukkit.getConsoleSender(), "pex user " + x.getName() + " group add Torch"); //<3 the tab
+                            Bukkit.getServer().dispatchCommand(Bukkit.getConsoleSender(), "tab reload");
 
-                        visionteam.add(x); //ADDS TO TEAM AND VISION FROM AOE
+                            visionteam.add(x); //ADDS TO TEAM AND VISION FROM AOE
+                        }
+                        return; //CANCELS UNNECESSARY SPAM FROM BELOW
                     }
-                    return; //CANCELS UNNECESSARY SPAM FROM BELOW
+
                 }
             }
         }
@@ -244,7 +252,7 @@ public class scoreboard implements Listener, CommandExecutor {
     }
 
 
-    public void setScoreboard(Player x) {
+    public static void setScoreboard(Player x) {
 
         Scoreboard oboard = Bukkit.getScoreboardManager().getNewScoreboard(); //Creates a new scoreboard for every player.
 
@@ -575,7 +583,7 @@ public class scoreboard implements Listener, CommandExecutor {
 
     }
 
-    public void updateScoreboard(Player x, Objective obj, Team healthteam, Team torchteam, Team blankscoreofficial) {
+    public static void updateScoreboard(Player x, Objective obj, Team healthteam, Team torchteam, Team blankscoreofficial) {
 
         //Variables that need to init every time to update.
         long health = Math.round(x.getHealth());

@@ -1,10 +1,8 @@
 package com.worldciv.events.player;
 
 import com.worldciv.the60th.MainTorch;
-import org.bukkit.Bukkit;
-import org.bukkit.ChatColor;
-import org.bukkit.GameMode;
-import org.bukkit.Location;
+import org.bukkit.*;
+import org.bukkit.block.Block;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
@@ -18,6 +16,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static com.worldciv.events.player.scoreboard.toggleblind;
+import static com.worldciv.events.player.scoreboard.togglevisionmessage;
 
 public class LightLevelEvent implements Listener {
 
@@ -26,7 +25,7 @@ public class LightLevelEvent implements Listener {
     public static void updateLightLevelEvent(Player player){
 
         Location location = player.getLocation();
-        Location vision = new Location(location.getWorld(), location.getX(), location.getY() + 1, location.getZ());
+        Location vision = new Location(location.getWorld(), location.getX(), location.getY() + 1.62, location.getZ());
         int LightLevel = vision.getBlock().getLightLevel();
 
         if (toggleblind.contains(player)) {
@@ -49,6 +48,7 @@ public class LightLevelEvent implements Listener {
 
         if (LightLevel <= 5) { // IF ITS DARK
 
+
             if (TorchEvent.holdingLight.contains(player)) { //IF A TORCH IS ONLY ON A PLAYER HAND
                 if (currentlyBlinded.contains(player)) {
                     currentlyBlinded.remove(player); //THIS REMOVES ONLY FOR PLAYER HOLDING
@@ -61,18 +61,23 @@ public class LightLevelEvent implements Listener {
                 for (int i = 0; i < entitylist.size(); i++) {
                     if (entitylist.get(i).getType() == EntityType.PLAYER) {
                         if (TorchEvent.holdingLight.contains((Player) entitylist.get(i))) {
-                            player.removePotionEffect(PotionEffectType.BLINDNESS);
-                            player.addPotionEffect(new PotionEffect(PotionEffectType.CONFUSION, 100, 3));
-                            if (currentlyBlinded.contains(player)) {
-                                currentlyBlinded.remove(player);
+                            if(vision.getBlock().getType() != Material.WATER || vision.getBlock().getType() != Material.STATIONARY_WATER ){
+
+                                player.removePotionEffect(PotionEffectType.BLINDNESS);
+                                player.addPotionEffect(new PotionEffect(PotionEffectType.CONFUSION, 100, 3));
+                                if (currentlyBlinded.contains(player)) {
+                                    currentlyBlinded.remove(player);
+                                }
+
+                                return;
                             }
 
-                            return;
                         }
                     }
                 }
                 if (!(player.hasPotionEffect(PotionEffectType.BLINDNESS))) {
-                    player.sendMessage(ChatColor.GOLD + "Your vision becomes unclear.");
+                    if(!togglevisionmessage.contains(player))
+                    player.sendMessage(ChatColor.GOLD + "[World-Civ]" + ChatColor.GRAY + " Your vision becomes unclear");
                     currentlyBlinded.add(player);
 
                 }
@@ -83,7 +88,8 @@ public class LightLevelEvent implements Listener {
             }
         } else if (LightLevel > 5) {
             if (player.hasPotionEffect(PotionEffectType.BLINDNESS)) {
-                player.sendMessage(ChatColor.GOLD + "Your vision begins to clear up.");
+                if(!togglevisionmessage.contains(player))
+                player.sendMessage(ChatColor.GOLD + "[World-Civ]" + ChatColor.GRAY + " Your vision begins to clear up from nearby light.");
                 player.removePotionEffect(PotionEffectType.BLINDNESS);
                 player.addPotionEffect(new PotionEffect(PotionEffectType.CONFUSION, 100, 3));
                 currentlyBlinded.remove(player);
