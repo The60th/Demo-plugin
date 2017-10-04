@@ -1,7 +1,6 @@
 package com.worldciv.the60th;
 
 import com.worldciv.events.player.LightLevelEvent;
-import com.worldciv.events.player.TorchEvent;
 import com.worldciv.events.player.scoreboard;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
@@ -84,7 +83,6 @@ public class MainTorch extends JavaPlugin implements Listener{
     public void registerEvents(){
         PluginManager pm = getServer().getPluginManager();
         pm.registerEvents(new LightLevelEvent(), this);
-        pm.registerEvents(new TorchEvent(), this);
         pm.registerEvents(new scoreboard(), this);
     }
 

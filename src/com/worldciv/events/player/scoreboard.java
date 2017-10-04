@@ -215,14 +215,14 @@ public class scoreboard implements Listener, CommandExecutor {
 
             if (entitylist.get(i).getType() == EntityType.PLAYER) { //for those that are players
 
-                if (TorchEvent.holdingLight.contains(x) && !visionteam.contains(x)) { //if you are being lit and you are already not in vision.
+                if (LightLevelEvent.holdingLight.contains(x) && !visionteam.contains(x)) { //if you are being lit and you are already not in vision.
 
-                    if(!togglevisionmessage.contains(entitylist.get(i)))
+                    if(!togglevisionmessage.contains((Player)entitylist.get(i)))
                     entitylist.get(i).sendMessage(worldciv + ChatColor.GRAY + " You have been provided vision by " + ChatColor.AQUA + x.getDisplayName());
 
                 }
 
-                if (TorchEvent.holdingLight.contains((Player) entitylist.get(i))) { //BELOW THIS (PLAYER) X BECOMES PERSON BEING LIT
+                if (LightLevelEvent.holdingLight.contains((Player) entitylist.get(i))) { //BELOW THIS (PLAYER) X BECOMES PERSON BEING LIT
 
                     if (vision.getBlock().getType() != Material.WATER || vision.getBlock().getType() != Material.STATIONARY_WATER) {
                         //    entitylist.get(i).sendMessage(x.getDisplayName()); WILL TELL YOU (ALL) WHO YOU (HOLDER OF TORCH) ARE LIGHTING HYPE example: KotoriXIII (me): You are lighting (all players)
@@ -259,7 +259,7 @@ public class scoreboard implements Listener, CommandExecutor {
 
         if (!LightLevelEvent.currentlyBlinded.contains(x)) { //if ur light level is high, u can see
             if (!visionteam.contains(x)) { //if ur not on torch team now u r
-                if (LightLevel > 5 || TorchEvent.holdingLight.contains(x)) {
+                if (LightLevel > 5 || LightLevelEvent.holdingLight.contains(x)) {
 
                     visionteam.add(x);
                     Bukkit.getServer().dispatchCommand(Bukkit.getConsoleSender(), "pex user " + x.getName() + " group add Torch");
