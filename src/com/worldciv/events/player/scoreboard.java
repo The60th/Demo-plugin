@@ -23,6 +23,8 @@ import org.bukkit.scoreboard.*;
 import java.util.ArrayList;
 import java.util.List;
 
+import static com.worldciv.events.player.LightLevelEvent.updateHoldingLight;
+
 public class scoreboard implements Listener, CommandExecutor {
 
     /*
@@ -624,7 +626,7 @@ public class scoreboard implements Listener, CommandExecutor {
                 updateScoreboard(x, obj, healthteam, torchteam , blankscoreofficial); //update every tick
             }
 
-        }.runTaskTimer(MainTorch.plugin, 0, 1);
+        }.runTaskTimer(MainTorch.plugin, 1, 5);
 
         x.setScoreboard(oboard);
 
@@ -638,6 +640,7 @@ public class scoreboard implements Listener, CommandExecutor {
 
         // obj.setDisplayName("World Civilization"); //idea for future: create animated title (look down for updateSidebarTitle). create a function to make things more neat.
 
+        updateHoldingLight(x);
         updateVisionTeam(x); //has to be called before checking if you are blind or not. checkmark or x.
         LightLevelEvent.updateLightLevelEvent(x);
 
