@@ -1,4 +1,4 @@
-name: World-Civ Demo
+name: WorldCivScoreboards
 main: com.worldciv.the60th.MainTorch
 version: 1.0
 commands:
@@ -8,3 +8,8 @@ commands:
   toggleblind:
     description:
     usage:
+permissions:
+  worldciv.toggleblind:
+    description:
+  worldciv.cmds:
+    description:
