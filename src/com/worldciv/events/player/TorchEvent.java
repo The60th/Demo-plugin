@@ -1,8 +1,7 @@
 package com.worldciv.events.player;
 
-import org.bukkit.ChatColor;
-import org.bukkit.Location;
-import org.bukkit.Material;
+import org.bukkit.*;
+import org.bukkit.block.Block;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -14,6 +13,7 @@ import org.bukkit.potion.PotionEffectType;
 import java.util.ArrayList;
 
 import static com.worldciv.events.player.scoreboard.togglevisionmessage;
+import static com.worldciv.events.player.scoreboard.worldciv;
 
 public class TorchEvent implements Listener {
     public static ArrayList<Player> holdingLight = new ArrayList<Player>();
@@ -22,6 +22,7 @@ public class TorchEvent implements Listener {
         Player player = event.getPlayer(); //Player from the event.
         ItemStack currentItem = player.getInventory().getItem(event.getNewSlot()); //The itemstack in the slot the player just moved to may be null
         ItemStack offHandItem =  player.getInventory().getItemInOffHand();
+
         if(currentItem == null) currentItem = new ItemStack(Material.AIR);
         if(offHandItem == null) offHandItem = new ItemStack(Material.AIR);
 
@@ -35,9 +36,12 @@ public class TorchEvent implements Listener {
             Location vision = new Location(location.getWorld(), location.getX(), location.getY() + 1.62, location.getZ());
 
 
+
+
+
             if(vision.getBlock().getType() == Material.WATER || vision.getBlock().getType() == Material.STATIONARY_WATER ){
                 if(!togglevisionmessage.contains(player))
-                player.sendMessage(ChatColor.GOLD + "[World-Civ]" + ChatColor.GRAY + " Torches don't work underwater, silly!");
+                player.sendMessage(worldciv + ChatColor.GRAY + " Torches don't work underwater, silly!");
                 if(holdingLight.contains(player)){
                     holdingLight.remove(player);
                 }
@@ -48,7 +52,7 @@ public class TorchEvent implements Listener {
             holdingLight.add(player);
             if (player.hasPotionEffect(PotionEffectType.BLINDNESS)) {
                 if(!togglevisionmessage.contains(player))
-                player.sendMessage(ChatColor.GOLD + "[World-Civ]" + ChatColor.GRAY + " Your vision begins to clear up from held light.");
+                player.sendMessage(worldciv + ChatColor.GRAY + " Your vision begins to clear up from held light.");
                 player.removePotionEffect(PotionEffectType.BLINDNESS);
                 player.addPotionEffect(new PotionEffect(PotionEffectType.CONFUSION, 100, 3));
 

@@ -16,6 +16,8 @@ import org.bukkit.plugin.java.JavaPlugin;
 
 import java.util.logging.Logger;
 
+import static com.worldciv.events.player.scoreboard.worldciv;
+
 public class MainTorch extends JavaPlugin implements Listener{
     FileConfiguration config = getConfig();
     public static Plugin plugin;
@@ -43,10 +45,12 @@ public class MainTorch extends JavaPlugin implements Listener{
                 Server server = getServer();
                 long time = server.getWorld("world").getTime();
 
+
+
                 if(time == 13200){
                     Bukkit.broadcastMessage(ChatColor.GOLD + "[World-Civ]" + ChatColor.GRAY + " It's getting dark...");
                 } else if (time == 22490){
-                    Bukkit.broadcastMessage(ChatColor.GOLD + "[World-Civ]" + ChatColor.GRAY + " It seems morning is arising.");
+                    Bukkit.broadcastMessage(ChatColor.GOLD + "[World-Civ]" + ChatColor.GRAY + " It appears morning is arising.");
 
                 }
             }
@@ -59,7 +63,7 @@ public class MainTorch extends JavaPlugin implements Listener{
 
         }
 
-        Bukkit.broadcastMessage(ChatColor.GOLD + "[World-Civ]" + ChatColor.GRAY + " Refreshing plugin data.");
+        Bukkit.broadcastMessage(worldciv + ChatColor.GRAY + " Refreshing plugin data.");
 
 
 

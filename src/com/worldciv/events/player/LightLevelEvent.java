@@ -17,6 +17,7 @@ import java.util.List;
 
 import static com.worldciv.events.player.scoreboard.toggleblind;
 import static com.worldciv.events.player.scoreboard.togglevisionmessage;
+import static com.worldciv.events.player.scoreboard.worldciv;
 
 public class LightLevelEvent implements Listener {
 
@@ -77,7 +78,7 @@ public class LightLevelEvent implements Listener {
                 }
                 if (!(player.hasPotionEffect(PotionEffectType.BLINDNESS))) {
                     if(!togglevisionmessage.contains(player))
-                    player.sendMessage(ChatColor.GOLD + "[World-Civ]" + ChatColor.GRAY + " Your vision becomes unclear");
+                    player.sendMessage(worldciv + ChatColor.GRAY + " Your vision becomes unclear");
                     currentlyBlinded.add(player);
 
                 }
@@ -89,7 +90,7 @@ public class LightLevelEvent implements Listener {
         } else if (LightLevel > 5) {
             if (player.hasPotionEffect(PotionEffectType.BLINDNESS)) {
                 if(!togglevisionmessage.contains(player))
-                player.sendMessage(ChatColor.GOLD + "[World-Civ]" + ChatColor.GRAY + " Your vision begins to clear up from nearby light.");
+                player.sendMessage(worldciv + ChatColor.GRAY + " Your vision begins to clear up from nearby light.");
                 player.removePotionEffect(PotionEffectType.BLINDNESS);
                 player.addPotionEffect(new PotionEffect(PotionEffectType.CONFUSION, 100, 3));
                 currentlyBlinded.remove(player);
