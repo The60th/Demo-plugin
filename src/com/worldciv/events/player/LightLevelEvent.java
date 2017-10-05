@@ -43,9 +43,9 @@ public class LightLevelEvent implements Listener {
                     currentlyBlinded.remove(player); //THIS REMOVES ONLY FOR PLAYER HOLDING
                     unBlindPlayer(player);
                 }
-
-                    unBlindPlayer(player);
-
+                    if(player.hasPotionEffect(PotionEffectType.BLINDNESS)) {
+                        unBlindPlayer(player);
+                    }
                 return;
 
             } else {
@@ -70,10 +70,8 @@ public class LightLevelEvent implements Listener {
                     }
                 }
                 if (!(player.hasPotionEffect(PotionEffectType.BLINDNESS))) {
-                    if(!togglevisionmessage.contains(player))
                     currentlyBlinded.add(player);
                     blindPlayer(player);
-
                 }
             }
         } else if (LightLevel > 5) {
@@ -131,11 +129,11 @@ public class LightLevelEvent implements Listener {
     }
 
     private static void blindPlayer(Player player){
-        player.sendMessage(worldciv + ChatColor.GRAY + " Your vision becomes unclear.");
+        if(!togglevisionmessage.contains(player)) player.sendMessage(worldciv + ChatColor.GRAY + " Your vision becomes unclear.");
         player.addPotionEffect(new PotionEffect(PotionEffectType.BLINDNESS,20000,2));
     }
     private static void unBlindPlayer(Player player){
-        player.sendMessage(worldciv + ChatColor.GRAY + " Your vision becomes clear.");
+        if(!togglevisionmessage.contains(player)) player.sendMessage(worldciv + ChatColor.GRAY + " Your vision becomes clear.");
         player.removePotionEffect(PotionEffectType.BLINDNESS);
     }
 
