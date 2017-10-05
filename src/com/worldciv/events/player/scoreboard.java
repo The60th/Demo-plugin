@@ -640,7 +640,7 @@ public class scoreboard implements Listener, CommandExecutor {
 
         // obj.setDisplayName("World Civilization"); //idea for future: create animated title (look down for updateSidebarTitle). create a function to make things more neat.
 
-        updateHoldingLight(x);
+        //updateHoldingLight(x); //Removed this dumb ass shit that should not be here //TODO
         updateVisionTeam(x); //has to be called before checking if you are blind or not. checkmark or x.
         LightLevelEvent.updateLightLevelEvent(x);
 
