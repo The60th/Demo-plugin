@@ -22,11 +22,6 @@ public class LightLevelEvent implements Listener {
     public static ArrayList<Player> holdingLight = new ArrayList<Player>();
 
     public static void updateLightLevelEvent(Player player){
-
-        Location location = player.getLocation();
-        Location vision = new Location(location.getWorld(), location.getX(), location.getY() + 1.62, location.getZ());
-        int LightLevel = vision.getBlock().getLightLevel();
-
         if (toggleblind.contains(player) || player.getGameMode() == GameMode.CREATIVE){
             if (currentlyBlinded.contains(player)) {
                 player.removePotionEffect(PotionEffectType.BLINDNESS);
@@ -35,12 +30,18 @@ public class LightLevelEvent implements Listener {
             return;
         }
 
+        Location location = player.getLocation();
+        Location vision = new Location(location.getWorld(), location.getX(), location.getY() + 1.62, location.getZ());
+        int LightLevel = vision.getBlock().getLightLevel();
+
         if (LightLevel <= 5) { // IF ITS DARK
+
             updateHoldingLight(player);
 
             if (holdingLight.contains(player)) { //IF A TORCH IS ONLY ON A PLAYER HAND
                 if (currentlyBlinded.contains(player)) {
                     currentlyBlinded.remove(player); //THIS REMOVES ONLY FOR PLAYER HOLDING
+                    unBlindPlayer(player);
                 }
                 return;
 
@@ -56,6 +57,7 @@ public class LightLevelEvent implements Listener {
                                 player.addPotionEffect(new PotionEffect(PotionEffectType.CONFUSION, 100, 3));
                                 if (currentlyBlinded.contains(player)) {
                                     currentlyBlinded.remove(player);
+                                    unBlindPlayer(player);
                                 }
 
                                 return;
@@ -66,65 +68,65 @@ public class LightLevelEvent implements Listener {
                 }
                 if (!(player.hasPotionEffect(PotionEffectType.BLINDNESS))) {
                     if(!togglevisionmessage.contains(player))
-                    player.sendMessage(worldciv + ChatColor.GRAY + " Your vision becomes unclear");
                     currentlyBlinded.add(player);
+                    blindPlayer(player);
 
                 }
-
-
-                player.addPotionEffect(new PotionEffect(PotionEffectType.BLINDNESS, 99999, 1));
-
             }
         } else if (LightLevel > 5) {
             if (player.hasPotionEffect(PotionEffectType.BLINDNESS)) {
-                if(!togglevisionmessage.contains(player))
-                player.sendMessage(worldciv + ChatColor.GRAY + " Your vision begins to clear up from nearby light.");
-                player.removePotionEffect(PotionEffectType.BLINDNESS);
-                player.addPotionEffect(new PotionEffect(PotionEffectType.CONFUSION, 100, 3));
+                unBlindPlayer(player);
                 currentlyBlinded.remove(player);
             }
         }
     }
 
-    public static void updateHoldingLight(Player x) {
-        ItemStack currentItem = x.getInventory().getItemInMainHand();
-        ItemStack offHandItem = x.getInventory().getItemInOffHand();
+    private static void updateHoldingLight(Player player) {
+        Material currentItem = player.getInventory().getItemInMainHand().getType();
+        Material offHandItem = player.getInventory().getItemInOffHand().getType();
 
-        if (currentItem.getType() != Material.TORCH && offHandItem.getType() != Material.TORCH) { //NOT HOLDING TORCH
-
-            if (holdingLight.contains(x)) //contains player holding light
-                holdingLight.remove(x); //remove player
-
-        } else if (currentItem.getType() == Material.TORCH || offHandItem.getType() == Material.TORCH) { //if youre holding a torch
-            holdingLight.add(x);
-            Location location = x.getLocation();
+        if(currentItem == Material.TORCH || offHandItem == Material.TORCH){
+            //Holding torch.
+            Location location = player.getLocation();
             Location vision = new Location(location.getWorld(), location.getX(), location.getY() + 1.62, location.getZ());
 
-            if (vision.getBlock().getType() == Material.WATER || vision.getBlock().getType() == Material.STATIONARY_WATER) { //if player's head is in water and youre holding a torch
-
-                    if (!togglevisionmessage.contains(x)) {
-                        x.sendMessage(worldciv + ChatColor.GRAY + " Torches don't work underwater, silly!");
-                    }
-                    if (holdingLight.contains(x)) { //if player's head is on water and youre holding a torch and PREVIOUSLY holding light
-                        holdingLight.remove(x);
-
+            if (vision.getBlock().getType() == Material.WATER || vision.getBlock().getType() == Material.STATIONARY_WATER) {
+                //in water no torch --no light so remove people
+                if(holdingLight.contains(player)){
+                    holdingLight.remove(player);
                 }
                 return;
             }
-
-            holdingLight.add(x);
-
-
-            if (x.hasPotionEffect(PotionEffectType.BLINDNESS)) {
-                if (!togglevisionmessage.contains(x))
-                    x.sendMessage(worldciv + ChatColor.GRAY + " Your vision begins to clear up from held light.");
-                x.removePotionEffect(PotionEffectType.BLINDNESS);
-                x.addPotionEffect(new PotionEffect(PotionEffectType.CONFUSION, 100, 3));
-
+            if(!holdingLight.contains(player)){
+                holdingLight.add(player);
+                if(currentlyBlinded.contains(player)){
+                    currentlyBlinded.remove(player);
+                }
+            }else{
+                if(currentlyBlinded.contains(player)){
+                    currentlyBlinded.remove(player);
+                }
+            }
+        }else{
+            if(holdingLight.contains(player)){
+                holdingLight.remove(player);
+            }
+            if(currentlyBlinded.contains(player)){
 
             }
-
+            else{
+                currentlyBlinded.add(player);
+            }
         }
+    }
+
+    private static void blindPlayer(Player player){
+        player.sendMessage(worldciv + ChatColor.GRAY + " Your vision becomes unclear.");
+        player.addPotionEffect(new PotionEffect(PotionEffectType.BLINDNESS,20000,2));
+    }
+    private static void unBlindPlayer(Player player){
+        player.sendMessage(worldciv + ChatColor.GRAY + " Your vision becomes clear.");
+        player.removePotionEffect(PotionEffectType.BLINDNESS);
     }
 
 }
