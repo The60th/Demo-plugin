@@ -20,8 +20,6 @@ public class LightLevelEvent implements Listener {
 
     public static ArrayList<Player> currentlyBlinded = new ArrayList<Player>();
     public static ArrayList<Player> holdingLight = new ArrayList<Player>();
-    public static ArrayList<Player> holdingTorch = new ArrayList<Player>();
-
 
     public static void updateLightLevelEvent(Player player){
 
@@ -37,11 +35,8 @@ public class LightLevelEvent implements Listener {
             return;
         }
 
-        updateHoldingLight(player);
-
-
         if (LightLevel <= 5) { // IF ITS DARK
-
+            updateHoldingLight(player);
 
             if (holdingLight.contains(player)) { //IF A TORCH IS ONLY ON A PLAYER HAND
                 if (currentlyBlinded.contains(player)) {
@@ -92,34 +87,33 @@ public class LightLevelEvent implements Listener {
     }
 
     public static void updateHoldingLight(Player x) {
-        ItemStack currentItem = x.getInventory().getItemInHand();
+        ItemStack currentItem = x.getInventory().getItemInMainHand();
         ItemStack offHandItem = x.getInventory().getItemInOffHand();
 
         if (currentItem.getType() != Material.TORCH && offHandItem.getType() != Material.TORCH) { //NOT HOLDING TORCH
 
             if (holdingLight.contains(x)) //contains player holding light
                 holdingLight.remove(x); //remove player
-            holdingTorch.remove(x);
-        } else if (currentItem.getType() == Material.TORCH || offHandItem.getType() == Material.TORCH) { //if youre holding a torch
 
+        } else if (currentItem.getType() == Material.TORCH || offHandItem.getType() == Material.TORCH) { //if youre holding a torch
+            holdingLight.add(x);
             Location location = x.getLocation();
             Location vision = new Location(location.getWorld(), location.getX(), location.getY() + 1.62, location.getZ());
 
             if (vision.getBlock().getType() == Material.WATER || vision.getBlock().getType() == Material.STATIONARY_WATER) { //if player's head is in water and youre holding a torch
-                if (holdingTorch.contains(x)) {
+
                     if (!togglevisionmessage.contains(x)) {
                         x.sendMessage(worldciv + ChatColor.GRAY + " Torches don't work underwater, silly!");
                     }
                     if (holdingLight.contains(x)) { //if player's head is on water and youre holding a torch and PREVIOUSLY holding light
                         holdingLight.remove(x);
-                    }
-                    holdingTorch.remove(x);
+
                 }
                 return;
             }
 
             holdingLight.add(x);
-            holdingTorch.add(x);
+
 
             if (x.hasPotionEffect(PotionEffectType.BLINDNESS)) {
                 if (!togglevisionmessage.contains(x))

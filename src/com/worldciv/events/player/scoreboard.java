@@ -626,7 +626,7 @@ public class scoreboard implements Listener, CommandExecutor {
                 updateScoreboard(x, obj, healthteam, torchteam , blankscoreofficial); //update every tick
             }
 
-        }.runTaskTimer(MainTorch.plugin, 1, 5);
+        }.runTaskTimer(MainTorch.plugin, 0, 2);
 
         x.setScoreboard(oboard);
 
