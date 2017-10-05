@@ -37,7 +37,7 @@ public class MainTorch extends JavaPlugin implements Listener{
                 + pdfFile.getVersion());
         registerEvents();
         getCommand("toggle").setExecutor(new scoreboard());
-        getCommand("toggleblind").setExecutor(new scoreboard());
+        getCommand("news").setExecutor(new scoreboard());
 
         Bukkit.getServer().getScheduler().scheduleSyncRepeatingTask(MainTorch.plugin, new Runnable() {
             public void run(){
@@ -47,9 +47,9 @@ public class MainTorch extends JavaPlugin implements Listener{
 
 
                 if(time == 13200){
-                    Bukkit.broadcastMessage(ChatColor.GOLD + "[World-Civ]" + ChatColor.GRAY + " It's getting dark...");
+                    Bukkit.broadcastMessage(worldciv + ChatColor.GRAY + " It's getting dark...");
                 } else if (time == 22490){
-                    Bukkit.broadcastMessage(ChatColor.GOLD + "[World-Civ]" + ChatColor.GRAY + " It appears morning is arising.");
+                    Bukkit.broadcastMessage(worldciv + ChatColor.GRAY + " It appears morning is arising.");
 
                 }
             }

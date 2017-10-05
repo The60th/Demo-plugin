@@ -8,8 +8,12 @@ commands:
   toggleblind:
     description:
     usage:
+  news:
+    description:
+    usage:
 permissions:
   worldciv.toggleblind:
     description:
   worldciv.cmds:
     description:
+  worldciv.news:

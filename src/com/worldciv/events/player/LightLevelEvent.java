@@ -43,6 +43,9 @@ public class LightLevelEvent implements Listener {
                     currentlyBlinded.remove(player); //THIS REMOVES ONLY FOR PLAYER HOLDING
                     unBlindPlayer(player);
                 }
+
+                    unBlindPlayer(player);
+
                 return;
 
             } else {
@@ -74,9 +77,16 @@ public class LightLevelEvent implements Listener {
                 }
             }
         } else if (LightLevel > 5) {
-            if (player.hasPotionEffect(PotionEffectType.BLINDNESS)) {
-                unBlindPlayer(player);
+
+            if(currentlyBlinded.contains(player)){
                 currentlyBlinded.remove(player);
+                unBlindPlayer(player);
+            }
+            else if(player.hasPotionEffect(PotionEffectType.BLINDNESS)){
+                unBlindPlayer(player);
+                if(!(holdingLight.contains(player))){
+                    holdingLight.add(player);
+                }
             }
         }
     }

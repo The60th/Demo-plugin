@@ -23,7 +23,6 @@ import org.bukkit.scoreboard.*;
 import java.util.ArrayList;
 import java.util.List;
 
-import static com.worldciv.events.player.LightLevelEvent.updateHoldingLight;
 
 public class scoreboard implements Listener, CommandExecutor {
 
@@ -97,10 +96,32 @@ public class scoreboard implements Listener, CommandExecutor {
         } else {
             Player p = (Player) sender;
 
-            if (cmd.getName().equalsIgnoreCase("toggle")) {
+            if (cmd.getName().equalsIgnoreCase("news")) {
+
+                if (!sender.hasPermission("worldciv.news")) {
+                    p.sendMessage(worldciv + ChatColor.GRAY + " This command is only allowed for staff. If you believe this is an error, ask staff to provide you the" + ChatColor.AQUA + " worldciv.news" + ChatColor.GRAY + " permission.");
+                    return true;
+                }
+
+                else if (args.length == 0) {
+                    p.sendMessage(worldciv + ChatColor.RED + " Invalid arguments! Example:" + ChatColor.YELLOW + " /news set <message>");
+                    return true;
+                } else if (args[0].equalsIgnoreCase("set")){
+                    p.sendMessage(worldciv + ChatColor.RED + " Specify a message! Example:" + ChatColor.YELLOW + " /news set <message>");
+                    return true;
+                } else {
+                    p.sendMessage("xxxxxx");
+                }
+
+
+
+
+            }
+
+           else if (cmd.getName().equalsIgnoreCase("toggle")) {
 
                 if (args.length == 0) {
-                    p.sendMessage(worldciv + ChatColor.RED + " Invalid arguments! Use /toggle help. Example: /toggle sb");
+                    p.sendMessage(worldciv + ChatColor.RED + " Invalid arguments! Use " +ChatColor.YELLOW + "/toggle help" +ChatColor.RED + ". Example: " + ChatColor.YELLOW + "/toggle sb");
                     return true;
                 }
 
@@ -179,7 +200,7 @@ public class scoreboard implements Listener, CommandExecutor {
                 }
 
                 else {
-                    p.sendMessage(worldciv+ ChatColor.RED + " Not a valid argument! Use /toggle help. Example: /toggle sb");
+                    p.sendMessage(worldciv+ ChatColor.RED + " Not a valid argument! Use" + ChatColor.YELLOW + " /toggle help" + ChatColor.RED + ". Example: " + ChatColor.YELLOW + "/toggle sb");
                     return true;
                 }
             }
@@ -640,7 +661,6 @@ public class scoreboard implements Listener, CommandExecutor {
 
         // obj.setDisplayName("World Civilization"); //idea for future: create animated title (look down for updateSidebarTitle). create a function to make things more neat.
 
-        //updateHoldingLight(x); //Removed this dumb ass shit that should not be here //TODO
         updateVisionTeam(x); //has to be called before checking if you are blind or not. checkmark or x.
         LightLevelEvent.updateLightLevelEvent(x);
 
