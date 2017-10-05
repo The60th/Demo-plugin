@@ -701,6 +701,7 @@ public class scoreboard implements Listener, CommandExecutor {
     }
 
 }
+//d
 
 
 
