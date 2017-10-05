@@ -5,18 +5,22 @@ import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
 import org.bukkit.event.Listener;
-import org.bukkit.inventory.ItemStack;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
 
 import java.util.ArrayList;
 import java.util.List;
 
-import static com.worldciv.events.player.scoreboard.toggleblind;
-import static com.worldciv.events.player.scoreboard.togglevisionmessage;
-import static com.worldciv.events.player.scoreboard.worldciv;
+import static com.worldciv.scoreboardmanager.setScoreboard.*;
 
-public class LightLevelEvent implements Listener {
+import static com.worldciv.devteam.main.worldciv;
+
+/*
+                This light level event class is a custom made class meant to detect the lightlevel of a player.
+                This class controls the behavior of blindness, array lists, and of the sort.  (no string usage)
+ */
+
+public class lightLevelEvent implements Listener {
 
     public static ArrayList<Player> currentlyBlinded = new ArrayList<Player>();
     public static ArrayList<Player> holdingLight = new ArrayList<Player>();

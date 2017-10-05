@@ -24,5 +24,5 @@ Messages-To-Hide-Filter:
 #Minecraft Color and Format Codes: http://minecraft.gamepedia.com/Formatting_codes    
 ChatMessages:
     NoPermission: '&4[System] &cYou don''t have permission!'
-    CmdHelp: '&4[System] &cAvailable commands:&6 /csf reload'
+    CmdHelp: '&4[System] &cAvailable Commands:&6 /csf reload'
     CmdReload: '&2[System] &aConfig reload complete!'

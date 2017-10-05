@@ -1,5 +1,5 @@
-name: WorldCivScoreboards
-main: com.worldciv.the60th.MainTorch
+name: OfficialWorldCiv
+main: com.worldciv.devteam.main
 version: 1.0
 commands:
   toggle:
@@ -17,3 +17,4 @@ permissions:
   worldciv.cmds:
     description:
   worldciv.news:
+    description:
