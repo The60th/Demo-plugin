@@ -2,7 +2,7 @@ package com.worldciv.utility;
 
 /*
     A utility code allowing for scrolling text to occur, this is a dependency for scrolling text in the news section of
-    the scoreboard.
+    the scoreboardManager.
     An example of usage is found below::
 	new BukkitRunnable()
 	{
