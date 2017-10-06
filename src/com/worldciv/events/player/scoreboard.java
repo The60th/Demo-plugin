@@ -1,6 +1,7 @@
 package com.worldciv.events.player;
 
 import com.worldciv.the60th.MainTorch;
+import com.worldciv.utility.Scroller;
 import org.bukkit.*;
 import org.bukkit.block.Block;
 import org.bukkit.command.Command;
@@ -54,10 +55,6 @@ public class scoreboard implements Listener, CommandExecutor {
 
      */
 
-    public class Box<T> {
-        public volatile T value;
-    }
-
     //empty scoreboard
     ScoreboardManager emptymanager = Bukkit.getScoreboardManager();
     Scoreboard emptyboard = emptymanager.getNewScoreboard();
@@ -70,6 +67,9 @@ public class scoreboard implements Listener, CommandExecutor {
 
     public static String worldciv = ChatColor.DARK_GRAY + "[" + ChatColor.GOLD + "World-Civ" + ChatColor.DARK_GRAY + "]";
     public static String bars = ChatColor.GOLD + "▬▬▬" + ChatColor.DARK_GRAY + "▬▬▬";
+    public static String maintop = ChatColor.DARK_GRAY + "║ " + bars + bars + bars + bars + worldciv + bars + bars + bars + bars + ChatColor.DARK_GRAY + "║";
+    public static String mainbot = ChatColor.DARK_GRAY + "║ " + bars + bars + bars + bars + bars + bars + bars + bars + bars + bars + ChatColor.DARK_GRAY + "║";
+
 
     @EventHandler
     public void onPlayerCommandPreprocess(PlayerCommandPreprocessEvent event) {
@@ -90,123 +90,151 @@ public class scoreboard implements Listener, CommandExecutor {
 
     public boolean onCommand(CommandSender sender, Command cmd, String alias, String[] args) {
 
-        if (!(sender instanceof Player)) {
-            sender.sendMessage(ChatColor.RED + "You must be a player to access this command!");
 
-        } else {
-            Player p = (Player) sender;
+        if (cmd.getName().equalsIgnoreCase("news")) {
+            if (!sender.hasPermission("worldciv.news") && sender instanceof Player) {
 
-            if (cmd.getName().equalsIgnoreCase("news")) {
+                sender.sendMessage(maintop);
+                sender.sendMessage(ChatColor.GRAY + " Today's current news message has been delivered to be:");
+                sender.sendMessage(" ");
+                sender.sendMessage(ChatColor.translateAlternateColorCodes('&', MainTorch.plugin.getConfig().getString("newsmessage")));
+                sender.sendMessage(" ");
+                sender.sendMessage(mainbot);
+                return true;
+            }
+            else if (args.length == 0) {
+                sender.sendMessage(maintop);
+                if (MainTorch.plugin.getConfig().getString("newsmessage") == null) {
+                    sender.sendMessage(ChatColor.GRAY + "No current news message found for the server. To add one use:" + ChatColor.YELLOW + " /news set <message>" + ChatColor.GRAY + ".");
+                    sender.sendMessage(mainbot);
+                    return true;
+                }
+                sender.sendMessage(ChatColor.GRAY + " The current news message is set to:");
+                sender.sendMessage(" ");
+                sender.sendMessage(ChatColor.translateAlternateColorCodes('&', MainTorch.plugin.getConfig().getString("newsmessage")));
+                sender.sendMessage(" ");
+                sender.sendMessage(ChatColor.GRAY + " To replace the current display message:" + ChatColor.YELLOW + " /news set <message>");
+                sender.sendMessage(ChatColor.GRAY + " Got no news? A bit dry?:" + ChatColor.YELLOW + " /news set empty");
+                sender.sendMessage(mainbot);
+                return true;
 
-                if (!sender.hasPermission("worldciv.news")) {
-                    p.sendMessage(worldciv + ChatColor.GRAY + " This command is only allowed for staff. If you believe this is an error, ask staff to provide you the" + ChatColor.AQUA + " worldciv.news" + ChatColor.GRAY + " permission.");
+            } else if (args[0].equalsIgnoreCase("set")) {
+
+                if (args.length >= 2) {
+
+                    StringBuilder str = new StringBuilder();
+                    for (int i = 1; i < args.length; i++) {
+                        str.append(args[i] + " ");
+                    }
+
+                    String newsstring = ChatColor.YELLOW + str.toString().substring(0, str.length() - 1);
+                    MainTorch.plugin.getConfig().set("newsmessage", newsstring);
+                    MainTorch.plugin.saveConfig();
+
+                    sender.sendMessage(ChatColor.GREEN + "The news message has been set to: ");
+                    sender.sendMessage(ChatColor.RESET + ChatColor.translateAlternateColorCodes('&', newsstring));
+
+                    for(Player players : Bukkit.getOnlinePlayers()){
+                        setScoreboard(players);
+                    }
                     return true;
                 }
 
-                else if (args.length == 0) {
-                    p.sendMessage(worldciv + ChatColor.RED + " Invalid arguments! Example:" + ChatColor.YELLOW + " /news set <message>");
-                    return true;
-                } else if (args[0].equalsIgnoreCase("set")){
-                    p.sendMessage(worldciv + ChatColor.RED + " Specify a message! Example:" + ChatColor.YELLOW + " /news set <message>");
-                    return true;
-                } else {
-                    p.sendMessage("xxxxxx");
-                }
+                sender.sendMessage(worldciv + ChatColor.RED + " Specify a message! Example:" + ChatColor.YELLOW + " /news set <message>");
+                return true;
 
-
-
+            } else {
+                sender.sendMessage(worldciv + ChatColor.RED + " Invalid arguments! Example:" + ChatColor.YELLOW + " /news set <message>");
+                return true;
 
             }
 
-           else if (cmd.getName().equalsIgnoreCase("toggle")) {
 
-                if (args.length == 0) {
-                    p.sendMessage(worldciv + ChatColor.RED + " Invalid arguments! Use " +ChatColor.YELLOW + "/toggle help" +ChatColor.RED + ". Example: " + ChatColor.YELLOW + "/toggle sb");
+        } else if (cmd.getName().equalsIgnoreCase("toggle")) {
+            if (!(sender instanceof Player)) {
+                sender.sendMessage(ChatColor.RED + "You must be a player to access this command!");
+
+                return true;
+            }
+
+            Player p = (Player) sender; //declare player
+
+            if (args.length == 0) {
+                p.sendMessage(worldciv + ChatColor.RED + " Invalid arguments! Use " + ChatColor.YELLOW + "/toggle help" + ChatColor.RED + ". Example: " + ChatColor.YELLOW + "/toggle sb");
+                return true;
+            } else if (args[0].equalsIgnoreCase("help")) {
+
+                p.sendMessage(maintop);
+                p.sendMessage(ChatColor.GRAY + " The toggle commands are:" + ChatColor.AQUA + " scoreboard (sb), sbanimation (anim), visionmessages (vm/vms)");
+
+                if (p.hasPermission("worldciv.blind")) {
+                    p.sendMessage(ChatColor.GRAY + " The staff toggle commands are (only staff can see this):" + ChatColor.AQUA + " blind (b)");
+                }
+                p.sendMessage(" " + mainbot);
+            } else if (args[0].equalsIgnoreCase("sb") || args[0].equalsIgnoreCase("scoreboard")) {
+                if (dummytoggleboard.contains(p)) {
+                    dummytoggleboard.remove(p);
+                    p.sendMessage(worldciv + ChatColor.GRAY + " The scoreboard has been enabled!");
+                    setScoreboard(p);
+                    return true;
+
+                } else if (!dummytoggleboard.contains(p)) {
+                    dummytoggleboard.add(p);
+                    p.sendMessage(worldciv + ChatColor.GRAY + " The scoreboard has been disabled!");
+                    p.setScoreboard(emptyboard);
                     return true;
                 }
-
-                else if (args[0].equalsIgnoreCase("help")) {
-
-                    p.sendMessage(ChatColor.DARK_GRAY + "║ " + bars + bars + bars  + bars + worldciv + bars + bars + bars + bars + ChatColor.DARK_GRAY + "║");
-                    p.sendMessage(ChatColor.GRAY + " The toggle commands are:" + ChatColor.AQUA + " scoreboard (sb), sbanimation (anim), visionmessages (vm/vms)");
-
-                    if(sender.hasPermission("worldciv.blind")){
-                        p.sendMessage(ChatColor.GRAY + " The staff toggle commands are (only staff can see this):" + ChatColor.AQUA + " blind (b)");
-                    }
-                    p.sendMessage(ChatColor.DARK_GRAY + " ║ " + bars + bars + bars + bars + bars + bars + bars + bars + bars + bars + ChatColor.DARK_GRAY + "║");
-                }
-
-                else if (args[0].equalsIgnoreCase("sb") || args[0].equalsIgnoreCase("scoreboard")) {
-                    if (dummytoggleboard.contains(p)) {
-                        dummytoggleboard.remove(p);
-                        p.sendMessage(worldciv + ChatColor.GRAY + " The scoreboard has been enabled!");
-                        setScoreboard(p);
-                        return true;
-
-                    } else if (!dummytoggleboard.contains(p)) {
-                        dummytoggleboard.add(p);
-                        p.sendMessage(worldciv + ChatColor.GRAY + " The scoreboard has been disabled!");
-                        p.setScoreboard(emptyboard);
-                        return true;
-                    }
-                }
-
-                else if (args[0].equalsIgnoreCase("blind") || args[0].equalsIgnoreCase("b")) {
-                    if (!sender.hasPermission("worldciv.toggleblind")) {
-                        p.sendMessage(worldciv + ChatColor.GRAY + " This command is only allowed for staff. If you believe this is an error, ask staff to provide you the" + ChatColor.AQUA + " worldciv.toggleblind" + ChatColor.GRAY + " permission.");
-                        return true;
-                    }
-                    if (!toggleblind.contains(p)) {
-                        toggleblind.add(p);
-                        p.sendMessage(worldciv + ChatColor.GRAY + " You have enabled " + ChatColor.YELLOW + "vision bypass.");
-                        if (p.hasPotionEffect(PotionEffectType.BLINDNESS)) {
-                            p.removePotionEffect(PotionEffectType.BLINDNESS);
-                        }
-                        return true;
-                    }
-                    if (toggleblind.contains(p)) {
-                        toggleblind.remove(p);
-                        p.sendMessage(worldciv + ChatColor.GRAY + " You have disabled " + ChatColor.YELLOW + "vision bypass.");
-                        return true;
-                    }
-                }
-
-                else if (args[0].equalsIgnoreCase("sbanimation") || args[0].equalsIgnoreCase("anim")) {
-                    if (toggledisplay.contains(p)) {
-                        toggledisplay.remove(p);
-                        p.sendMessage(worldciv + ChatColor.GRAY + " The display title's animation has been enabled!");
-                        return true;
-
-                    } else if (!toggledisplay.contains(p)) {
-                        toggledisplay.add(p);
-                        p.sendMessage(worldciv + ChatColor.GRAY + " The display title's animation has been disabled!");
-
-                        return true;
-                    }
-                }
-
-                else if (args[0].equalsIgnoreCase("visionmessages") || args[0].equalsIgnoreCase("vm") || args[0].equalsIgnoreCase("vms")) {
-                    if (togglevisionmessage.contains(p)) {
-                        togglevisionmessage.remove(p);
-                        p.sendMessage(worldciv + ChatColor.GRAY + " The vision message notifications have been enabled!");
-                        return true;
-
-                    } else if (!togglevisionmessage.contains(p)) {
-                        togglevisionmessage.add(p);
-                        p.sendMessage(worldciv + ChatColor.GRAY + " The vision message notifications have been disabled!");
-
-                        return true;
-                    }
-                }
-
-                else {
-                    p.sendMessage(worldciv+ ChatColor.RED + " Not a valid argument! Use" + ChatColor.YELLOW + " /toggle help" + ChatColor.RED + ". Example: " + ChatColor.YELLOW + "/toggle sb");
+            } else if (args[0].equalsIgnoreCase("blind") || args[0].equalsIgnoreCase("b")) {
+                if (!p.hasPermission("worldciv.toggleblind")) {
+                    p.sendMessage(worldciv + ChatColor.GRAY + " This command is only allowed for staff. If you believe this is an error, ask staff to provide you the" + ChatColor.AQUA + " worldciv.toggleblind" + ChatColor.GRAY + " permission.");
                     return true;
                 }
+                if (!toggleblind.contains(p)) {
+                    toggleblind.add(p);
+                    p.sendMessage(worldciv + ChatColor.GRAY + " You have enabled " + ChatColor.YELLOW + "vision bypass.");
+                    if (p.hasPotionEffect(PotionEffectType.BLINDNESS)) {
+                        p.removePotionEffect(PotionEffectType.BLINDNESS);
+                    }
+                    return true;
+                }
+                if (toggleblind.contains(p)) {
+                    toggleblind.remove(p);
+                    p.sendMessage(worldciv + ChatColor.GRAY + " You have disabled " + ChatColor.YELLOW + "vision bypass.");
+                    return true;
+                }
+            } else if (args[0].equalsIgnoreCase("sbanimation") || args[0].equalsIgnoreCase("anim")) {
+                if (toggledisplay.contains(p)) {
+                    toggledisplay.remove(p);
+                    p.sendMessage(worldciv + ChatColor.GRAY + " The display title's animation has been enabled!");
+                    return true;
+
+                } else if (!toggledisplay.contains(p)) {
+                    toggledisplay.add(p);
+                    p.sendMessage(worldciv + ChatColor.GRAY + " The display title's animation has been disabled!");
+
+                    return true;
+                }
+            } else if (args[0].equalsIgnoreCase("visionmessages") || args[0].equalsIgnoreCase("vm") || args[0].equalsIgnoreCase("vms")) {
+                if (togglevisionmessage.contains(p)) {
+                    togglevisionmessage.remove(p);
+                    p.sendMessage(worldciv + ChatColor.GRAY + " The vision message notifications have been enabled!");
+                    return true;
+
+                } else if (!togglevisionmessage.contains(p)) {
+                    togglevisionmessage.add(p);
+                    p.sendMessage(worldciv + ChatColor.GRAY + " The vision message notifications have been disabled!");
+
+                    return true;
+                }
+            } else {
+                p.sendMessage(worldciv + ChatColor.RED + " Not a valid argument! Use" + ChatColor.YELLOW + " /toggle help" + ChatColor.RED + ". Example: " + ChatColor.YELLOW + "/toggle sb");
+                return true;
             }
         }
+
         return true;
     }
+
 
     @EventHandler
     public void onPlayerQuit(PlayerQuitEvent e) {
@@ -306,12 +334,12 @@ public class scoreboard implements Listener, CommandExecutor {
         obj.setDisplaySlot(DisplaySlot.SIDEBAR); //self explanatory, this objective is present in the sidebar
 
         //Complex team variables. These will be only used for CHANGING VALUES. I.E: Health, Torch. DO NOT USE FOR STATIC SCORES LIKE BLANK SCORES, IGN, "HEALTH: "
-        final Team healthteam = oboard.registerNewTeam("Health"); //valid team: hp changes result from dmg or heal
+        final Team newsteam = oboard.registerNewTeam("News"); //valid team: news changes for all players
         final Team torchteam = oboard.registerNewTeam("Torch"); //valid team: blind or not
         final Team blankscoreofficial = oboard.registerNewTeam("blankscore"); //used to increase size
 
         //Create dummyplayers. These are returned by Bukkit. Not real players, creates object player.
-        healthteam.addPlayer(Bukkit.getOfflinePlayer(ChatColor.RED.toString()));
+        newsteam.addPlayer(Bukkit.getOfflinePlayer(ChatColor.RED.toString()));
         torchteam.addPlayer(Bukkit.getOfflinePlayer(ChatColor.BLUE.toString()));
         blankscoreofficial.addPlayer(Bukkit.getOfflinePlayer(ChatColor.YELLOW.toString()));
 
@@ -323,13 +351,16 @@ public class scoreboard implements Listener, CommandExecutor {
         blankscore3.setScore(4);
 
         //Create static placement of scores. (what line on sidebar)
-        obj.getScore(ChatColor.RED.toString()).setScore(5); //changing value of health. not actual "Health: " string.
+        obj.getScore(ChatColor.RED.toString()).setScore(5); //changing value of  news.
         obj.getScore(ChatColor.BLUE.toString()).setScore(3); //changing value of whether blind or not. torch check or x.
         obj.getScore(ChatColor.YELLOW.toString()).setScore(10); //static we need prefix/suffix abuse
 
         //The loop under me plays the animated display title. try not to create too many loops yo.
        new BukkitRunnable(){
-            int rotation = 1000;
+
+           int rotation = 1000;
+
+           Scroller scroller = new Scroller(ChatColor.translateAlternateColorCodes('&', MainTorch.plugin.getConfig().getString("newsmessage")), 16, 5, '&');
 
             @Override
             public void run() {
@@ -337,6 +368,14 @@ public class scoreboard implements Listener, CommandExecutor {
                 if(!x.isOnline()){
                     cancel();
                 }
+
+
+                if (MainTorch.plugin.getConfig().getString("newsmessage") == null || MainTorch.plugin.getConfig().getString("newsmessage").equals(ChatColor.YELLOW + "empty") || MainTorch.plugin.getConfig().getString("newsmessage").isEmpty()) {
+                    newsteam.setPrefix(ChatColor.RED + "No news today!");
+                } else {
+                    newsteam.setPrefix(ChatColor.translateAlternateColorCodes('&', scroller.next()));  //to change go to top in static line numbers. | line 5.
+                }
+
 
                 //COLOR KEY
                 ChatColor defaultcolor = ChatColor.GOLD;   //worldciv default coloring
@@ -644,7 +683,7 @@ public class scoreboard implements Listener, CommandExecutor {
                 if(!x.isOnline()){
                     cancel();
                 }
-                updateScoreboard(x, obj, healthteam, torchteam , blankscoreofficial); //update every tick
+                updateScoreboard(x, obj, newsteam, torchteam , blankscoreofficial); //update every tick
             }
 
         }.runTaskTimer(MainTorch.plugin, 0, 2);
@@ -653,7 +692,7 @@ public class scoreboard implements Listener, CommandExecutor {
 
     }
 
-    public static void updateScoreboard(Player x, Objective obj, Team healthteam, Team torchteam, Team blankscoreofficial) {
+    public static void updateScoreboard(Player x, Objective obj, Team newsteam, Team torchteam, Team blankscoreofficial) {
 
 
         //Variables that need to init every time to update.
@@ -675,10 +714,10 @@ public class scoreboard implements Listener, CommandExecutor {
 
         //blankscore2 | line 7
 
-        Score score2 = obj.getScore(ChatColor.AQUA + "Health:");
+        Score score2 = obj.getScore(ChatColor.AQUA + "News:");
         score2.setScore(6);
 
-        healthteam.setPrefix(ChatColor.GRAY + String.valueOf(health));  //to change go to top in static line numbers. | line 5.
+        //newsteam.setPrefix();  //to change go to top in static line numbers. | line 5.
 
         //blankscore3 | line 4
 
