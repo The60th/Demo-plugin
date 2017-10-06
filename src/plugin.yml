@@ -5,14 +5,11 @@ commands:
   toggle:
     description:
     usage:
-  toggleblind:
-    description:
-    usage:
   news:
     description:
     usage:
 permissions:
-  worldciv.toggleblind:
+  worldciv.togglevision:
     description:
   worldciv.cmds:
     description:

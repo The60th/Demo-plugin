@@ -2,25 +2,13 @@ package com.worldciv.scoreboard;
 
 import com.worldciv.the60th.MainTorch;
 import com.worldciv.utility.LightLevelEvent;
-import com.worldciv.utility.Scroller;
 import org.bukkit.*;
-import org.bukkit.command.Command;
-import org.bukkit.command.CommandExecutor;
-import org.bukkit.command.CommandSender;
-import org.bukkit.command.ConsoleCommandSender;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
-import org.bukkit.event.EventHandler;
-import org.bukkit.event.Listener;
-import org.bukkit.event.player.PlayerCommandPreprocessEvent;
-import org.bukkit.event.player.PlayerJoinEvent;
-import org.bukkit.event.player.PlayerQuitEvent;
-import org.bukkit.potion.PotionEffectType;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.scoreboard.*;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import static com.worldciv.utility.utilityArrays.*;
@@ -28,36 +16,6 @@ import static com.worldciv.utility.utilityStrings.worldciv;
 
 
 public class scoreboardManager {
-
-    /*
-                                    NOTES [10/2/2017]
-
-     - find new way for prefix, use players instead? too many combinations in groups.
-
-                 Pros for Group Prefix:
-                     - You can set permissions for a group in considered "Vision" group.
-                  Pros for User Prefix:
-                     - LESSS groups and less switching. less pain for pex :(.
-
-
-     BUG
-     - another bug 60 needs to fix or i may need help. player double casts when you are lighting someone? because 2 players in range? test with 3?
-     - offhand support critically needed, check how event works ezpz form there
-
-     need-to-do:
-    - reset pex/tab configs from teams (not crucially needed, do once decided to move from Torch groups to suffixes)
-    - make a sick blankscore underlining name of server??? look at examples online
-    - scrolling string instead? releasing top news / patches / events
-    - config for news
-    - anvil stuff yeahh!
-
-    for future maybe ideas:
-    -know who you are lighting! found way somewhere in comments below in updatevisionTeam. perfect for dungeons.
-    - rain turn off torches
-
-     */
-
-    //empty scoreboardManager
 
     private animationManager animationManager = new animationManager();
 
@@ -152,7 +110,7 @@ public class scoreboardManager {
 
         // SCORE TO HAVE ✓ OR ✗ MARK
 
-        if (player.getGameMode() == GameMode.CREATIVE || toggleblind.contains(player)) {
+        if (player.getGameMode() == GameMode.CREATIVE || togglevision.contains(player)) {
             torchTeam.setPrefix(ChatColor.YELLOW + "VISION BYPASS");
             torchTeam.setSuffix(ChatColor.RESET + "");
         } else {
@@ -175,30 +133,47 @@ public class scoreboardManager {
 
     public static void updateVisionTeam(Player player) {
 
+        if (togglevision.contains(player) || player.getGameMode() == GameMode.CREATIVE){
+            if (currentlyBlinded.contains(player)) {
+
+                Bukkit.getServer().dispatchCommand(Bukkit.getConsoleSender(), "tab player " + player.getName() + " tagprefix &e[V] &f"); //<3 the tab
+                Bukkit.getServer().dispatchCommand(Bukkit.getConsoleSender(), "tab reload");
+
+                visionteam.add(player); //ONLY STRING FOR ACTUAL REMOVING BLINDNESS GO TO LIGHTLEVEL EVENT
+
+            }
+            return;
+        }
+
+
+
+
         Location location = player.getLocation(); //player loc variables
         Location vision = new Location(location.getWorld(), location.getX(), location.getY() + 1.62, location.getZ());
         int LightLevel = vision.getBlock().getLightLevel();
+
+
 
         List<Entity> entitylist = player.getNearbyEntities(5, 5, 5); //getting radius 5
         for (int i = 0; i < entitylist.size(); i++) { // for all that are in vision effect
 
             if (entitylist.get(i).getType() == EntityType.PLAYER) { //for those that are players
 
-                if (LightLevelEvent.holdingLight.contains(player) && !visionteam.contains(player)) { //if you are being lit and you are already not in vision.
+                if (holdingLight.contains(player) && !visionteam.contains(player)) { //if you are being lit and you are already not in vision.
 
                     if(!togglevisionmessage.contains((Player)entitylist.get(i)))
                         entitylist.get(i).sendMessage(worldciv + ChatColor.GRAY + " You have been provided vision by " + ChatColor.AQUA + player.getDisplayName());
 
                 }
 
-                if (LightLevelEvent.holdingLight.contains((Player) entitylist.get(i))) { //BELOW THIS (PLAYER) X BECOMES PERSON BEING LIT
+                if (holdingLight.contains((Player) entitylist.get(i))) { //BELOW THIS (PLAYER) X BECOMES PERSON BEING LIT
 
                     if (vision.getBlock().getType() != Material.WATER || vision.getBlock().getType() != Material.STATIONARY_WATER) {
                         //    entitylist.get(i).sendMessage(x.getDisplayName()); WILL TELL YOU (ALL) WHO YOU (HOLDER OF TORCH) ARE LIGHTING HYPE example: KotoriXIII (me): You are lighting (all players)
 
                         if (!visionteam.contains(player)) {
 
-                            Bukkit.getServer().dispatchCommand(Bukkit.getConsoleSender(), "pex user " + player.getName() + " group add Torch"); //<3 the tab
+                            Bukkit.getServer().dispatchCommand(Bukkit.getConsoleSender(), "tab player " + player.getName() + " tagprefix &e[V] &f"); //<3 the tab
                             Bukkit.getServer().dispatchCommand(Bukkit.getConsoleSender(), "tab reload");
 
                             visionteam.add(player); //ADDS TO TEAM AND VISION FROM AOE
@@ -211,12 +186,12 @@ public class scoreboardManager {
         }
 
 
-        if (LightLevelEvent.currentlyBlinded.contains(player)) { //if ur light level is low with no light
+        if (currentlyBlinded.contains(player)) { //if ur light level is low with no light
 
             if (visionteam.contains(player)) { //if u r in torch visionteam
 
                 visionteam.remove(player); // remove from visionteam
-                Bukkit.getServer().dispatchCommand(Bukkit.getConsoleSender(), "pex user " + player.getName() + " group remove Torch"); //<3 the tab
+                Bukkit.getServer().dispatchCommand(Bukkit.getConsoleSender(), "tab player " + player.getName() + " tagprefix &f"); //<3 the tab
                 Bukkit.getServer().dispatchCommand(Bukkit.getConsoleSender(), "tab reload");
 
                 //YOU HAVE BEEN BLINDED
@@ -226,12 +201,13 @@ public class scoreboardManager {
         }
 
 
-        if (!LightLevelEvent.currentlyBlinded.contains(player)) { //if ur light level is high, u can see
+        if (!currentlyBlinded.contains(player)) { //if ur light level is high, u can see
             if (!visionteam.contains(player)) { //if ur not on torch team now u r
-                if (LightLevel > 5 || LightLevelEvent.holdingLight.contains(player)) {
+
+                if (LightLevel > 5 || holdingLight.contains(player)) {
 
                     visionteam.add(player);
-                    Bukkit.getServer().dispatchCommand(Bukkit.getConsoleSender(), "pex user " + player.getName() + " group add Torch");
+                    Bukkit.getServer().dispatchCommand(Bukkit.getConsoleSender(), "tab player " + player.getName() + " tagprefix &e[V] &f"); //<3 the tab
                     Bukkit.getServer().dispatchCommand(Bukkit.getConsoleSender(), "tab reload");
 
                     //YOU HAVE EYES NOW, YAY YOU CAN SEE

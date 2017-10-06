@@ -1,8 +1,10 @@
 package com.worldciv.the60th;
 
 import com.worldciv.commands.commands;
+import com.worldciv.events.player.commandPreprocess;
 import com.worldciv.events.player.join;
 import com.worldciv.events.player.quit;
+import com.worldciv.events.player.weatherChangeEvent;
 import com.worldciv.scoreboard.scoreboardManager;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
@@ -24,6 +26,15 @@ public class MainTorch extends JavaPlugin implements Listener{
     FileConfiguration config = getConfig();
     public static scoreboardManager scoreboardManager;
     public static Plugin plugin;
+
+        /*
+                                    NOTES [6 October 2017: 6:41am PST]
+
+    for future maybe ideas:
+    -know who you are lighting! found way somewhere in comments below in updatevisionTeam. perfect for dungeons.
+    - rain turn off torches
+
+     */
 
     public void onEnable() {
 
@@ -91,6 +102,8 @@ public class MainTorch extends JavaPlugin implements Listener{
         PluginManager pm = getServer().getPluginManager();
         pm.registerEvents(new quit(), this);
         pm.registerEvents(new join(), this);
+        pm.registerEvents(new commandPreprocess(), this);
+        pm.registerEvents(new weatherChangeEvent(), this);
 
     }
 

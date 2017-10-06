@@ -186,8 +186,8 @@ public class commands implements CommandExecutor {
                 p.sendMessage(maintop);
                 p.sendMessage(ChatColor.GRAY + " The toggle commands are:" + ChatColor.AQUA + " scoreboard (sb), sbanimation (anim), visionmessages (vm/vms)");
 
-                if (p.hasPermission("worldciv.blind")) {
-                    p.sendMessage(ChatColor.GRAY + " The staff toggle commands are (only staff can see this):" + ChatColor.AQUA + " blind (b)");
+                if (p.hasPermission("worldciv.togglevision")) {
+                    p.sendMessage(ChatColor.GRAY + " The staff toggle commands are (only staff can see this):" + ChatColor.AQUA + " vision (v)");
                 }
                 p.sendMessage(" " + mainbot);
             } else if (args[0].equalsIgnoreCase("sb") || args[0].equalsIgnoreCase("scoreboard")) {
@@ -203,21 +203,19 @@ public class commands implements CommandExecutor {
                     p.setScoreboard(Bukkit.getScoreboardManager().getNewScoreboard());
                     return true;
                 }
-            } else if (args[0].equalsIgnoreCase("blind") || args[0].equalsIgnoreCase("b")) {
-                if (!p.hasPermission("worldciv.toggleblind")) {
-                    p.sendMessage(worldciv + ChatColor.GRAY + " This command is only allowed for staff. If you believe this is an error, ask staff to provide you the" + ChatColor.AQUA + " worldciv.toggleblind" + ChatColor.GRAY + " permission.");
+            } else if (args[0].equalsIgnoreCase("vision") || args[0].equalsIgnoreCase("v")) {
+                if (!p.hasPermission("worldciv.togglevision")) {
+                    p.sendMessage(worldciv + ChatColor.GRAY + " This command is only allowed for staff. If you believe this is an error, ask staff to provide you the" + ChatColor.AQUA + " worldciv.togglevision" + ChatColor.GRAY + " permission.");
                     return true;
                 }
-                if (!toggleblind.contains(p)) {
-                    toggleblind.add(p);
+                if (!togglevision.contains(p)) {
+                    togglevision.add(p);
                     p.sendMessage(worldciv + ChatColor.GRAY + " You have enabled " + ChatColor.YELLOW + "vision bypass.");
-                    if (p.hasPotionEffect(PotionEffectType.BLINDNESS)) {
-                        p.removePotionEffect(PotionEffectType.BLINDNESS);
-                    }
+
                     return true;
                 }
-                if (toggleblind.contains(p)) {
-                    toggleblind.remove(p);
+                if (togglevision.contains(p)) {
+                    togglevision.remove(p);
                     p.sendMessage(worldciv + ChatColor.GRAY + " You have disabled " + ChatColor.YELLOW + "vision bypass.");
                     return true;
                 }
