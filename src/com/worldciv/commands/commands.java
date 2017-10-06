@@ -3,16 +3,20 @@ package com.worldciv.commands;
 import com.worldciv.the60th.MainTorch;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
+import org.bukkit.Sound;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
+import org.bukkit.command.ConsoleCommandSender;
 import org.bukkit.entity.Player;
 import org.bukkit.potion.PotionEffectType;
+import org.bukkit.scheduler.BukkitRunnable;
 
 import static com.worldciv.utility.utilityArrays.*;
 import static com.worldciv.utility.utilityStrings.mainbot;
 import static com.worldciv.utility.utilityStrings.maintop;
 import static com.worldciv.utility.utilityStrings.worldciv;
+import static com.worldciv.utility.utilityStrings.newsstring;
 
 public class commands implements CommandExecutor {
 
@@ -22,14 +26,17 @@ public class commands implements CommandExecutor {
             if (!sender.hasPermission("worldciv.news") && sender instanceof Player) {
 
                 sender.sendMessage(maintop);
-                sender.sendMessage(ChatColor.GRAY + " Today's current news message has been delivered to be:");
+                sender.sendMessage(ChatColor.GRAY + " The latest news has been delivered to you:");
                 sender.sendMessage(" ");
-                sender.sendMessage(ChatColor.translateAlternateColorCodes('&', MainTorch.plugin.getConfig().getString("newsmessage")));
+                if (MainTorch.plugin.getConfig().getString("newsmessage").equals("          " + ChatColor.YELLOW + "empty")) {
+                    sender.sendMessage(ChatColor.RESET + ChatColor.translateAlternateColorCodes('&', ChatColor.RED + "No news today!"));
+                } else {
+                    sender.sendMessage(ChatColor.translateAlternateColorCodes('&', MainTorch.plugin.getConfig().getString("newsmessage")));
+                }
                 sender.sendMessage(" ");
                 sender.sendMessage(mainbot);
                 return true;
-            }
-            else if (args.length == 0) {
+            } else if (args.length == 0) {
                 sender.sendMessage(maintop);
                 if (MainTorch.plugin.getConfig().getString("newsmessage") == null) {
                     sender.sendMessage(ChatColor.GRAY + "No current news message found for the server. To add one use:" + ChatColor.YELLOW + " /news set <message>" + ChatColor.GRAY + ".");
@@ -38,7 +45,11 @@ public class commands implements CommandExecutor {
                 }
                 sender.sendMessage(ChatColor.GRAY + " The current news message is set to:");
                 sender.sendMessage(" ");
-                sender.sendMessage(ChatColor.translateAlternateColorCodes('&', MainTorch.plugin.getConfig().getString("newsmessage")));
+                if (MainTorch.plugin.getConfig().getString("newsmessage").equals("          " + ChatColor.YELLOW + "empty")) {
+                    sender.sendMessage(ChatColor.RESET + ChatColor.translateAlternateColorCodes('&', ChatColor.RED + "No news today!"));
+                } else {
+                    sender.sendMessage(ChatColor.translateAlternateColorCodes('&', MainTorch.plugin.getConfig().getString("newsmessage")));
+                }
                 sender.sendMessage(" ");
                 sender.sendMessage(ChatColor.GRAY + " To replace the current display message:" + ChatColor.YELLOW + " /news set <message>");
                 sender.sendMessage(ChatColor.GRAY + " Got no news? A bit dry?:" + ChatColor.YELLOW + " /news set empty");
@@ -49,25 +60,106 @@ public class commands implements CommandExecutor {
 
                 if (args.length >= 2) {
 
+                    if (sender instanceof ConsoleCommandSender) {
+                        StringBuilder str = new StringBuilder();
+                        for (int i = 1; i < args.length; i++) {
+                            str.append(args[i] + " ");
+                        }
+
+                        newsstring = ChatColor.YELLOW + str.toString().substring(0, str.length() - 1); //removes space
+
+
+                        MainTorch.plugin.getConfig().set("newsmessage", "          " + newsstring);
+                        MainTorch.plugin.saveConfig();
+
+                        sender.sendMessage(worldciv + ChatColor.GREEN + "The news message has been set to: ");
+
+                        Bukkit.broadcastMessage(worldciv + ChatColor.GRAY + " The news has been updated! Check the scoreboard or /news");
+
+                        return true;
+                    }
+
+                    Player p = (Player) sender;
+
+                    if (setnewsmessage.contains(sender)) {
+                        sender.sendMessage(worldciv + ChatColor.GRAY + "You can't use this again! Confirm with" + ChatColor.YELLOW + " /news y" + ChatColor.RED + " or" + ChatColor.YELLOW + " /news n");
+                        return true;
+                    }
+
+                    setnewsmessage.add(p);
+
                     StringBuilder str = new StringBuilder();
                     for (int i = 1; i < args.length; i++) {
                         str.append(args[i] + " ");
                     }
 
-                    String newsstring = ChatColor.YELLOW + str.toString().substring(0, str.length() - 1);
-                    MainTorch.plugin.getConfig().set("newsmessage", newsstring);
-                    MainTorch.plugin.saveConfig();
+                    newsstring = ChatColor.YELLOW + str.toString().substring(0, str.length() - 1); //removes space
 
-                    sender.sendMessage(ChatColor.GREEN + "The news message has been set to: ");
-                    sender.sendMessage(ChatColor.RESET + ChatColor.translateAlternateColorCodes('&', newsstring));
-
-                    for(Player players : Bukkit.getOnlinePlayers()){
-                        MainTorch.getScoreboardManager().setScoreboard(players);
+                    sender.sendMessage(ChatColor.YELLOW + "This is what your news message looks like in text:");
+                    sender.sendMessage("");
+                    if (args[1].equalsIgnoreCase("empty")) {
+                        sender.sendMessage(ChatColor.RESET + ChatColor.translateAlternateColorCodes('&', ChatColor.RED + "No news today!"));
+                    } else {
+                        sender.sendMessage(ChatColor.RESET + ChatColor.translateAlternateColorCodes('&', newsstring));
                     }
+                    sender.sendMessage("");
+                    sender.sendMessage(ChatColor.RED + "You have 30 seconds to confirm with:" + ChatColor.YELLOW + " /news y" + ChatColor.RED + " or" + ChatColor.YELLOW + " /news n");
+
+                    new BukkitRunnable() {
+                        int x = 0;
+
+                        public void run() {
+
+                            if (!setnewsmessage.contains(sender)) {
+                                cancel();
+                            }
+
+                            x++;
+                            if (x == 30) {
+                                sender.sendMessage(worldciv + ChatColor.RED + " The time expired!");
+                                setnewsmessage.remove(sender);
+                                cancel();
+                            }
+                        }
+                    }.runTaskTimer(MainTorch.plugin, 0, 20);
+
+
                     return true;
                 }
 
                 sender.sendMessage(worldciv + ChatColor.RED + " Specify a message! Example:" + ChatColor.YELLOW + " /news set <message>");
+                return true;
+
+            } else if (args[0].equalsIgnoreCase("y")) {
+
+                if (!setnewsmessage.contains(sender)) {
+                    sender.sendMessage(worldciv + ChatColor.RED + " You must set a message first!");
+                    return true;
+                }
+
+
+                MainTorch.plugin.getConfig().set("newsmessage", "          " + newsstring);
+                MainTorch.plugin.saveConfig();
+
+                sender.sendMessage(worldciv + ChatColor.GREEN + " The news message has been set!");
+
+                Bukkit.broadcastMessage(worldciv + ChatColor.GRAY + " The news has been updated! Check the scoreboard or /news");
+
+                for (Player players : Bukkit.getOnlinePlayers()) {
+                    // double pitch = .5 + (.033 * 2);                   //.5 (from place) + .033 (# note from beginning)
+                    players.playSound(players.getLocation(), Sound.BLOCK_NOTE_SNARE, 3.0F, 6);
+                    MainTorch.getScoreboardManager().setScoreboard(players);
+                }
+                setnewsmessage.remove(sender);
+                return true;
+
+            } else if (args[0].equalsIgnoreCase("n")) {
+                if (!setnewsmessage.contains(sender)) {
+                    sender.sendMessage(worldciv + ChatColor.RED + " You must set a message first!");
+                    return true;
+                }
+                sender.sendMessage(worldciv + ChatColor.RED + " You refused to use this news message!");
+                setnewsmessage.remove(sender);
                 return true;
 
             } else {
@@ -92,23 +184,23 @@ public class commands implements CommandExecutor {
             } else if (args[0].equalsIgnoreCase("help")) {
 
                 p.sendMessage(maintop);
-                p.sendMessage(ChatColor.GRAY + " The toggle commands are:" + ChatColor.AQUA + " scoreboardManager (sb), sbanimation (anim), visionmessages (vm/vms)");
+                p.sendMessage(ChatColor.GRAY + " The toggle commands are:" + ChatColor.AQUA + " scoreboard (sb), sbanimation (anim), visionmessages (vm/vms)");
 
                 if (p.hasPermission("worldciv.blind")) {
                     p.sendMessage(ChatColor.GRAY + " The staff toggle commands are (only staff can see this):" + ChatColor.AQUA + " blind (b)");
                 }
                 p.sendMessage(" " + mainbot);
-            } else if (args[0].equalsIgnoreCase("sb") || args[0].equalsIgnoreCase("scoreboardManager")) {
+            } else if (args[0].equalsIgnoreCase("sb") || args[0].equalsIgnoreCase("scoreboard")) {
                 if (dummytoggleboard.contains(p)) {
                     dummytoggleboard.remove(p);
-                    p.sendMessage(worldciv + ChatColor.GRAY + " The scoreboardManager has been enabled!");
+                    p.sendMessage(worldciv + ChatColor.GRAY + " The scoreboard has been enabled!");
                     MainTorch.getScoreboardManager().setScoreboard(p);
                     return true;
 
                 } else if (!dummytoggleboard.contains(p)) {
                     dummytoggleboard.add(p);
-                    p.sendMessage(worldciv + ChatColor.GRAY + " The scoreboardManager has been disabled!");
-                    p.setScoreboard(MainTorch.getScoreboardManager().emptyboard);
+                    p.sendMessage(worldciv + ChatColor.GRAY + " The scoreboard has been disabled!");
+                    p.setScoreboard(Bukkit.getScoreboardManager().getNewScoreboard());
                     return true;
                 }
             } else if (args[0].equalsIgnoreCase("blind") || args[0].equalsIgnoreCase("b")) {

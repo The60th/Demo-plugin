@@ -58,8 +58,7 @@ public class scoreboardManager {
      */
 
     //empty scoreboardManager
-    private ScoreboardManager emptymanager = Bukkit.getScoreboardManager();
-    public Scoreboard emptyboard = emptymanager.getNewScoreboard();
+
     private animationManager animationManager = new animationManager();
 
     /**

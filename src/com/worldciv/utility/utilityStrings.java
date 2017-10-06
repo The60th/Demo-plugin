@@ -8,4 +8,8 @@ public final class utilityStrings {
     public final static String maintop = ChatColor.DARK_GRAY + "║ " + bars + bars + bars + bars + worldciv + bars + bars + bars + bars + ChatColor.DARK_GRAY + "║";
     public final static String mainbot = ChatColor.DARK_GRAY + "║ " + bars + bars + bars + bars + bars + bars + bars + bars + bars + bars + ChatColor.DARK_GRAY + "║";
 
+    public static String newsstring;
+
+
+
 }

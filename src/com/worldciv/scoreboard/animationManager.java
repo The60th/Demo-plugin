@@ -20,19 +20,20 @@ public final class animationManager {
     private final String sin = ChatColor.DARK_RED + ">";
     private final String sout = ChatColor.DARK_RED + "<";
     private final ChatColor rcomhighlight = ChatColor.DARK_PURPLE;
-    private Scroller scroller = new Scroller(ChatColor.translateAlternateColorCodes('&', "Jixty for life."), 16, 5, '&');
+
 
     public animationManager(){}
 
     public void serverNameAnimation(Objective objective, Player player, Team team,Team newsTeam){
         new BukkitRunnable(){
             int rotation = 1000;
+            Scroller scroller = new Scroller(ChatColor.translateAlternateColorCodes('&', MainTorch.plugin.getConfig().getString("newsmessage")), 16, 5, '&');
         @Override
         public void run() {
             if(!player.isOnline()){
                 cancel();
             }
-            if (MainTorch.plugin.getConfig().getString("newsmessage") == null || MainTorch.plugin.getConfig().getString("newsmessage").equals(ChatColor.YELLOW + "empty") || MainTorch.plugin.getConfig().getString("newsmessage").isEmpty()) {
+            if (MainTorch.plugin.getConfig().getString("newsmessage") == null || MainTorch.plugin.getConfig().getString("newsmessage").equals("          " + ChatColor.YELLOW + "empty") || MainTorch.plugin.getConfig().getString("newsmessage").isEmpty()) {
                 newsTeam.setPrefix(ChatColor.RED + "No news today!");
             } else {
                 newsTeam.setPrefix(ChatColor.translateAlternateColorCodes('&', scroller.next()));  //to change go to top in static line numbers. | line 5.

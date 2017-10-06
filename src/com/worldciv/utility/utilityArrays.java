@@ -10,4 +10,6 @@ public final class utilityArrays {
     public final static ArrayList<Player> dummytoggleboard = new ArrayList<Player>();
     public final static ArrayList<Player> toggledisplay = new ArrayList<Player>();
     public final static ArrayList<Player> togglevisionmessage = new ArrayList<Player>();
+
+    public final static ArrayList<Player> setnewsmessage = new ArrayList<Player>();
 }
