@@ -25,6 +25,10 @@ public class MainTorch extends JavaPlugin implements Listener{
 
         getConfig().options().copyDefaults(true);
         getConfig().set("World Civilization", "");
+
+        if (getConfig().getString("newsmessage") == null) {
+            getConfig().set("newsmessage", ChatColor.GRAY + "Is this a new server? Do /news set <msg>");
+        }
         saveConfig();
 
         plugin = this;
