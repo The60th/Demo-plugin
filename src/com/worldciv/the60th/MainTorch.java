@@ -41,6 +41,10 @@ public class MainTorch extends JavaPlugin implements Listener{
 
     public void onEnable() {
 
+
+        getConfig().options().copyDefaults(true);
+        getConfig().set("World Civilization", "");
+
         if (getConfig().getString("newsmessage") == null) {
             getConfig().set("newsmessage", "          " + ChatColor.GRAY + "This must be a new server. Set a news message with /news set <message>");
         }
@@ -114,10 +118,10 @@ public class MainTorch extends JavaPlugin implements Listener{
         return scoreboardManager;
     }
 
-    @Override
-    public FileConfiguration getConfig() {
+
+   /* public FileConfiguration getConfig() {
         return config;
-    }
+    }*/
 
     public FileConfiguration getMessages() {
         return messages;
