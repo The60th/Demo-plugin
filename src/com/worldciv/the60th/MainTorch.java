@@ -25,25 +25,14 @@ import static com.worldciv.utility.utilityStrings.worldciv;
 
 public class MainTorch extends JavaPlugin implements Listener{
 
-    FileConfiguration config, messages, settings;
+
     public static scoreboardManager scoreboardManager;
     public static Plugin plugin;
-    private PluginDescriptionFile pdfFile;
 
-        /*
-                                    NOTES [6 October 2017: 6:41am PST]
-
-    for future maybe ideas:
-    -know who you are lighting! found way somewhere in comments below in updatevisionTeam. perfect for dungeons.
-    - rain turn off torches
-
-     */
 
     public void onEnable() {
 
-
         getConfig().options().copyDefaults(true);
-        getConfig().set("World Civilization", "");
 
         if (getConfig().getString("newsmessage") == null) {
             getConfig().set("newsmessage", "          " + ChatColor.GRAY + "This must be a new server. Set a news message with /news set <message>");
@@ -107,8 +96,7 @@ public class MainTorch extends JavaPlugin implements Listener{
 
     }
 
-    private void loadConfig(){
-    }
+
 
     public static Plugin getPlugin() {
         return plugin;
@@ -118,26 +106,6 @@ public class MainTorch extends JavaPlugin implements Listener{
         return scoreboardManager;
     }
 
-
-   /* public FileConfiguration getConfig() {
-        return config;
-    }*/
-
-    public FileConfiguration getMessages() {
-        return messages;
-    }
-
-    public FileConfiguration getSettings() {
-        return settings;
-    }
-
-    public String getVersion(){
-        return pdfFile.getVersion();
-    }
-
-    public String getAuthor(){
-        return pdfFile.getAuthors().get(0);
-    }
 
 
 }
