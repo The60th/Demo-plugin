@@ -8,6 +8,9 @@ commands:
   news:
     description:
     usage:
+  party:
+    description:
+    usage:
 permissions:
   worldciv.togglevision:
     description:

@@ -25,7 +25,7 @@ public class LightLevelEvent  {
         }
 
         Location location = player.getLocation();
-        Location vision = new Location(location.getWorld(), location.getX(), location.getY() + 1.62, location.getZ());
+        Location vision = new Location(location.getWorld(), location.getX(), location.getY() + 1, location.getZ());
         int LightLevel = vision.getBlock().getLightLevel();
 
         if (LightLevel <= 5) { // IF ITS DARK

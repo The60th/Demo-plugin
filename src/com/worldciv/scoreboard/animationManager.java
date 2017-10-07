@@ -9,6 +9,7 @@ import org.bukkit.scoreboard.Objective;
 import org.bukkit.scoreboard.Scoreboard;
 import org.bukkit.scoreboard.Team;
 
+import static com.worldciv.utility.utilityArrays.dummytoggleboard;
 import static com.worldciv.utility.utilityArrays.toggledisplay;
 
 public final class animationManager {
@@ -33,6 +34,8 @@ public final class animationManager {
             if(!player.isOnline()){
                 cancel();
             }
+
+
             if (MainTorch.plugin.getConfig().getString("newsmessage") == null || MainTorch.plugin.getConfig().getString("newsmessage").equals("          " + ChatColor.YELLOW + "empty") || MainTorch.plugin.getConfig().getString("newsmessage").isEmpty()) {
                 newsTeam.setPrefix(ChatColor.RED + "No news today!");
             } else {

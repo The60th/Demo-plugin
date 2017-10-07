@@ -62,6 +62,11 @@ public class scoreboardManager {
                 if(!player.isOnline()){
                     cancel();
                 }
+
+                if(dummytoggleboard.contains(player)){
+                    cancel();
+                }
+
                 updateScoreboard(player, obj, newsteam, torchteam , blankscoreofficial); //update every tick
             }
 
@@ -149,7 +154,7 @@ public class scoreboardManager {
 
 
         Location location = player.getLocation(); //player loc variables
-        Location vision = new Location(location.getWorld(), location.getX(), location.getY() + 1.62, location.getZ());
+        Location vision = new Location(location.getWorld(), location.getX(), location.getY() + 1, location.getZ());
         int LightLevel = vision.getBlock().getLightLevel();
 
 
@@ -206,12 +211,14 @@ public class scoreboardManager {
 
                 if (LightLevel > 5 || holdingLight.contains(player)) {
 
-                    visionteam.add(player);
-                    Bukkit.getServer().dispatchCommand(Bukkit.getConsoleSender(), "tab player " + player.getName() + " tagprefix &e[V] &f"); //<3 the tab
-                    Bukkit.getServer().dispatchCommand(Bukkit.getConsoleSender(), "tab reload");
+                    if(player != null) {
 
-                    //YOU HAVE EYES NOW, YAY YOU CAN SEE
+                        visionteam.add(player);
+                        Bukkit.getServer().dispatchCommand(Bukkit.getConsoleSender(), "tab player " + player.getName() + " tagprefix &e[V] &f"); //<3 the tab
+                        Bukkit.getServer().dispatchCommand(Bukkit.getConsoleSender(), "tab reload");
 
+                        //YOU HAVE EYES NOW, YAY YOU CAN SEE
+                    }
                 }
             }
         }

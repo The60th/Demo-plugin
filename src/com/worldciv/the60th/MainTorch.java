@@ -1,6 +1,8 @@
 package com.worldciv.the60th;
 
-import com.worldciv.commands.commands;
+import com.worldciv.commands.news;
+import com.worldciv.commands.party;
+import com.worldciv.commands.toggle;
 import com.worldciv.events.player.commandPreprocess;
 import com.worldciv.events.player.join;
 import com.worldciv.events.player.quit;
@@ -16,7 +18,6 @@ import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.PluginDescriptionFile;
 import org.bukkit.plugin.PluginManager;
 import org.bukkit.plugin.java.JavaPlugin;
-import org.bukkit.scoreboard.ScoreboardManager;
 
 import java.util.logging.Logger;
 
@@ -95,8 +96,9 @@ public class MainTorch extends JavaPlugin implements Listener{
     }
 
     public void registerCommands(){
-        getCommand("toggle").setExecutor(new commands());
-        getCommand("news").setExecutor(new commands());
+        getCommand("toggle").setExecutor(new toggle());
+        getCommand("news").setExecutor(new news());
+        getCommand("party").setExecutor(new party());
     }
     public void registerEvents(){
         PluginManager pm = getServer().getPluginManager();
