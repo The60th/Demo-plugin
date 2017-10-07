@@ -13,7 +13,7 @@ import static com.worldciv.utility.utilityStrings.mainbot;
 import static com.worldciv.utility.utilityStrings.maintop;
 import static com.worldciv.utility.utilityStrings.worldciv;
 
-public class toggle implements CommandExecutor {
+public class Toggle implements CommandExecutor {
     @Override
     public boolean onCommand(CommandSender sender, Command cmd, String alias, String[] args) {
         if (cmd.getName().equalsIgnoreCase("toggle")) {

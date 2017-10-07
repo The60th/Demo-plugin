@@ -1,8 +1,8 @@
 package com.worldciv.the60th;
 
-import com.worldciv.commands.news;
-import com.worldciv.commands.party;
-import com.worldciv.commands.toggle;
+import com.worldciv.commands.News;
+import com.worldciv.commands.Party;
+import com.worldciv.commands.Toggle;
 import com.worldciv.events.player.commandPreprocess;
 import com.worldciv.events.player.join;
 import com.worldciv.events.player.quit;
@@ -24,9 +24,11 @@ import java.util.logging.Logger;
 import static com.worldciv.utility.utilityStrings.worldciv;
 
 public class MainTorch extends JavaPlugin implements Listener{
-    FileConfiguration config = getConfig();
+
+    FileConfiguration config, messages, settings;
     public static scoreboardManager scoreboardManager;
     public static Plugin plugin;
+    private PluginDescriptionFile pdfFile;
 
         /*
                                     NOTES [6 October 2017: 6:41am PST]
@@ -38,9 +40,6 @@ public class MainTorch extends JavaPlugin implements Listener{
      */
 
     public void onEnable() {
-
-        getConfig().options().copyDefaults(true);
-        getConfig().set("World Civilization", "");
 
         if (getConfig().getString("newsmessage") == null) {
             getConfig().set("newsmessage", "          " + ChatColor.GRAY + "This must be a new server. Set a news message with /news set <message>");
@@ -78,14 +77,8 @@ public class MainTorch extends JavaPlugin implements Listener{
         for (Player p : Bukkit.getOnlinePlayers()){
             p.setScoreboard(Bukkit.getScoreboardManager().getNewScoreboard()); //REMOVES CURRENT SB if at all any.
             scoreboardManager.setScoreboard(p);
-
-
         }
-
         Bukkit.broadcastMessage(worldciv + ChatColor.GRAY + " Refreshing plugin data.");
-
-
-
     }
 
     public void onDisable() {
@@ -96,10 +89,11 @@ public class MainTorch extends JavaPlugin implements Listener{
     }
 
     public void registerCommands(){
-        getCommand("toggle").setExecutor(new toggle());
-        getCommand("news").setExecutor(new news());
-        getCommand("party").setExecutor(new party());
+        getCommand("toggle").setExecutor(new Toggle());
+        getCommand("news").setExecutor(new News());
+        getCommand("party").setExecutor(new Party());
     }
+
     public void registerEvents(){
         PluginManager pm = getServer().getPluginManager();
         pm.registerEvents(new quit(), this);
@@ -109,21 +103,44 @@ public class MainTorch extends JavaPlugin implements Listener{
 
     }
 
-
-    private void registerPermissons(){
-        //PluginManager pm = getServer().getPluginManager();
-        //Permission p = new Permission("Permisson name");
-        //pm.addPermission(p);
-
+    private void loadConfig(){
     }
-
-
 
     public static Plugin getPlugin() {
         return plugin;
     }
+
     public static scoreboardManager getScoreboardManager() {
         return scoreboardManager;
     }
 
+    @Override
+    public FileConfiguration getConfig() {
+        return config;
+    }
+
+    public FileConfiguration getMessages() {
+        return messages;
+    }
+
+    public FileConfiguration getSettings() {
+        return settings;
+    }
+
+    public String getVersion(){
+        return pdfFile.getVersion();
+    }
+
+    public String getAuthor(){
+        return pdfFile.getAuthors().get(0);
+    }
+
+
 }
+
+
+
+
+
+
+

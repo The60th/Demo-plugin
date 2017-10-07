@@ -93,7 +93,7 @@ Groups:
     tabprefix: ""
     tagprefix: "&c[T] &f"
     
-#personal settings, override group settings
+#personal settings.yml, override group settings.yml
 Users:
   Player1:
     tabprefix: ""
@@ -101,7 +101,7 @@ Users:
     tabsuffix: ""
     tagsuffix: ""
     
-#list of worlds with different settings than default, other worlds will use settings from above
+#list of worlds with different settings.yml than default, other worlds will use settings.yml from above
 per-world-settings:
   world1:
     header:

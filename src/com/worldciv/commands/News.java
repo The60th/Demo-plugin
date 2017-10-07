@@ -14,7 +14,7 @@ import org.bukkit.scheduler.BukkitRunnable;
 import static com.worldciv.utility.utilityStrings.*;
 import static com.worldciv.utility.utilityArrays.*;
 
-public class news implements CommandExecutor {
+public class News implements CommandExecutor {
 
     @Override
     public boolean onCommand(CommandSender sender, Command cmd, String alias, String[] args) {
