@@ -11,8 +11,8 @@ import org.bukkit.command.ConsoleCommandSender;
 import org.bukkit.entity.Player;
 import org.bukkit.scheduler.BukkitRunnable;
 
+import static com.worldciv.utility.utilityArrays.setnewsmessage;
 import static com.worldciv.utility.utilityStrings.*;
-import static com.worldciv.utility.utilityArrays.*;
 
 public class News implements CommandExecutor {
 
@@ -21,17 +21,23 @@ public class News implements CommandExecutor {
         if (cmd.getName().equalsIgnoreCase("news")) {
             if (!sender.hasPermission("worldciv.news") && sender instanceof Player) {
 
-                sender.sendMessage(maintop);
-                sender.sendMessage(ChatColor.GRAY + " The latest news has been delivered to you:");
-                sender.sendMessage(" ");
-                if (MainTorch.plugin.getConfig().getString("newsmessage").equals("          " + ChatColor.YELLOW + "empty")) {
-                    sender.sendMessage(ChatColor.RESET + ChatColor.translateAlternateColorCodes('&', ChatColor.RED + "No news today!"));
+                if (args.length == 0) {
+
+                    sender.sendMessage(maintop);
+                    sender.sendMessage(ChatColor.GRAY + " The latest news has been delivered to you:");
+                    sender.sendMessage(" ");
+                    if (MainTorch.plugin.getConfig().getString("newsmessage").equals("          " + ChatColor.YELLOW + "empty")) {
+                        sender.sendMessage(ChatColor.RESET + ChatColor.translateAlternateColorCodes('&', ChatColor.RED + "No news today!"));
+                    } else {
+                        sender.sendMessage(ChatColor.translateAlternateColorCodes('&', MainTorch.plugin.getConfig().getString("newsmessage")));
+                    }
+                    sender.sendMessage(" ");
+                    sender.sendMessage(mainbot);
+                    return true;
                 } else {
-                    sender.sendMessage(ChatColor.translateAlternateColorCodes('&', MainTorch.plugin.getConfig().getString("newsmessage")));
+                    sender.sendMessage(worldciv + ChatColor.GRAY +  " Did you mean to use" + ChatColor.YELLOW + " /news" + ChatColor.GRAY + "?");
+                    return false;
                 }
-                sender.sendMessage(" ");
-                sender.sendMessage(mainbot);
-                return true;
             } else if (args.length == 0) {
                 sender.sendMessage(maintop);
                 if (MainTorch.plugin.getConfig().getString("newsmessage") == null) {
@@ -108,6 +114,7 @@ public class News implements CommandExecutor {
 
                             if (!setnewsmessage.contains(sender)) {
                                 cancel();
+                                return;
                             }
 
                             x++;
@@ -115,6 +122,7 @@ public class News implements CommandExecutor {
                                 sender.sendMessage(worldciv + ChatColor.RED + " The time expired!");
                                 setnewsmessage.remove(sender);
                                 cancel();
+                                return;
                             }
                         }
                     }.runTaskTimer(MainTorch.plugin, 0, 20);

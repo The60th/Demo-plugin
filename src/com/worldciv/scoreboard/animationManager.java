@@ -35,6 +35,8 @@ public final class animationManager {
                 cancel();
             }
 
+            
+
 
             if (MainTorch.plugin.getConfig().getString("newsmessage") == null || MainTorch.plugin.getConfig().getString("newsmessage").equals("          " + ChatColor.YELLOW + "empty") || MainTorch.plugin.getConfig().getString("newsmessage").isEmpty()) {
                 newsTeam.setPrefix(ChatColor.RED + "No news today!");
