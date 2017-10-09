@@ -1,20 +1,18 @@
 package com.worldciv.commands;
 
+import com.worldciv.parties.Party;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
-import org.bukkit.scheduler.BukkitRunnable;
 
-import static com.worldciv.the60th.MainTorch.plugin;
-import static com.worldciv.utility.utilityMultimaps.partyid;
 import static com.worldciv.utility.utilityMultimaps.partyrequest;
 import static com.worldciv.utility.utilityStrings.*;
 
 
-public class Party implements CommandExecutor {
+public class PartyCommand implements CommandExecutor {
 
 
     @Override
@@ -26,12 +24,16 @@ public class Party implements CommandExecutor {
         }
 
         Player sender = (Player) robotsender;
+        com.worldciv.parties.Party party = new com.worldciv.parties.Party();
+
 
         if (cmd.getName().equalsIgnoreCase("party") || cmd.getName().equalsIgnoreCase("p")) {
             if (args.length == 0 || args[0].equalsIgnoreCase("help")) {
                 if (true || args[0].equalsIgnoreCase("help")) { //this if statement checks if youre in a party /// !p.hasParty()
                     sender.sendMessage(maintop);
                     sender.sendMessage(ChatColor.YELLOW + "/party create" + ChatColor.GRAY + ": Create a party to challenge a dungeon.");
+                    sender.sendMessage(ChatColor.YELLOW + "/party leave" + ChatColor.GRAY + ": Abandon your current party.");
+                    sender.sendMessage(ChatColor.YELLOW + "/party disband" + ChatColor.GRAY + ": Disbands the entire party.");
                     sender.sendMessage(ChatColor.YELLOW + "/party invite <player>" + ChatColor.GRAY + ": Invite a challenger to your party.");
                     sender.sendMessage(ChatColor.YELLOW + "/party kick <player>" + ChatColor.GRAY + ": Kick the coward from your party.");
                     sender.sendMessage(ChatColor.YELLOW + "/party accept <player>" + ChatColor.GRAY + ": Join a dungeon-raiding party.");
@@ -51,60 +53,46 @@ public class Party implements CommandExecutor {
 
                     if (args.length >= 2) { //If /party invite <this argument or more>
 
-                        Player receiver = Bukkit.getServer().getPlayer(args[1]);
+                        if(!party.hasParty(sender)){
+                            sender.sendMessage(worldciv + ChatColor.GRAY + " To invite players you must create your own party!");
+                            return true;
+                        }
 
-                        if (receiver == null || !receiver.isOnline()) {
+                        Player receiver = Bukkit.getServer().getPlayer(args[1]); //DECLARE receiver
+
+                        if (receiver == null || !receiver.isOnline()) { //PLAYER DOES NOT EXIST
                             sender.sendMessage(worldciv + ChatColor.GRAY + " We tried our hardest... but we couldn't find this player.");
                             return true;
                         }
 
-                        if (receiver == sender) {
+                        if (party.size(sender) >= 2){ //does not count leader. I.E: if you want max party to be 4. do >=3
+                            sender.sendMessage(worldciv + ChatColor.GRAY + " You have reached the max party size! You can't invite more challengers!");
+                            return true;
+                        }
+
+                        if (receiver == sender) { //same player
                             sender.sendMessage(worldciv + ChatColor.GRAY + " There has to be someone else you can invite. You can't invite yourself...");
                             return true;
                         }
 
-                        com.worldciv.parties.Party party = new com.worldciv.parties.Party();
-
-                        if (party.invite(sender)){
+                        if(party.hasSameParty(sender, receiver)){
+                            sender.sendMessage(worldciv + ChatColor.GRAY + " This player is already in your party!");
                             return true;
                         }
 
-                        if(partyrequest.containsEntry(sender.getName(), receiver.getName())){
-                                sender.sendMessage(worldciv + " " + ChatColor.YELLOW + receiver.getName() + ChatColor.GRAY + " still has an open invitation from you.");
-                                return true;
-
+                        if(party.hasParty(receiver)){
+                            sender.sendMessage(worldciv + ChatColor.GRAY + " Unfortunately, " +ChatColor.AQUA + receiver.getName() + ChatColor.GRAY + ", is already in another party.");
+                            return true;
                         }
 
-                        sender.sendMessage(worldciv + ChatColor.GRAY + " You have sent an invitation to " + ChatColor.AQUA + receiver.getName() + ChatColor.GRAY
-                                + " to join your party! They have 15 seconds to respond to your message.");
-
-                        receiver.sendMessage(worldciv + ChatColor.GRAY + " You have received an invitation from " + ChatColor.AQUA + sender.getName()
-                                + ChatColor.GRAY + " to join their party! You have 15 seconds to confirm with " + ChatColor.YELLOW + "/party accept " + sender.getName() + ChatColor.GRAY + " or" + ChatColor.YELLOW + " /party deny " + sender.getName());
 
 
-                        partyrequest.put(sender.getName(), receiver.getName());
+                        if (party.isInvited(sender, receiver)){ //if the player you are inviting is the same player
+                          sender.sendMessage(worldciv + " " + ChatColor.YELLOW + receiver.getName() + ChatColor.GRAY + " still has an open invitation from you.");
+                          return  true;
+                      }
 
-                        new BukkitRunnable() {
-                            int x = 0;
-
-                            public void run() {
-
-                                if (!partyrequest.containsKey(sender.getName())) {
-                                    if (!partyrequest.containsValue(receiver.getName()))
-                                        cancel();
-                                    return;
-                                }
-
-                                x++;
-                                if (x == 15) {
-                                    sender.sendMessage(worldciv + ChatColor.GRAY + " The invitation for " + ChatColor.AQUA + receiver.getName() + ChatColor.GRAY + " has expired.");
-                                    receiver.sendMessage(worldciv + ChatColor.GRAY + " The invitation from " + ChatColor.AQUA + sender.getName() + ChatColor.GRAY + " has expired.");
-                                    partyrequest.remove(sender.getName(), receiver.getName());
-                                    cancel();
-                                    return;
-                                }
-                            }
-                        }.runTaskTimer(plugin, 0, 20);
+                        party.invite(sender, receiver); //invite from to receiver
 
                         return true;
 
@@ -123,6 +111,11 @@ public class Party implements CommandExecutor {
                             return true;
                         }
 
+                        if(party.hasParty(sender)){
+                            sender.sendMessage(worldciv + ChatColor.GRAY + " You're already in a party!");
+                            return true;
+                        }
+
                         if (sender == leader) {
                             sender.sendMessage(worldciv + ChatColor.GRAY + " You can't join your own party... Join another!");
                             return true;
@@ -138,12 +131,15 @@ public class Party implements CommandExecutor {
 
                         if (partyrequest.containsEntry(leader.getName(), sender.getName())) {
 
+                            if(party.hasParty(leader)){
+                                partyrequest.remove(leader.getName(), sender.getName());
+
+                                party.add(sender, leader); //some party sht
+                            } else {
+                                sender.sendMessage(worldciv + ChatColor.GRAY + " The party was disbanded before you joined.");
+                            }
 
 
-                            partyrequest.remove(leader.getName(), sender.getName());
-
-                            com.worldciv.parties.Party party = new com.worldciv.parties.Party();
-                            party.add(sender, leader); //some party sht
 
                             return true;
                         }
@@ -163,6 +159,11 @@ public class Party implements CommandExecutor {
 
                         if (leader == null || !leader.isOnline()) {
                             sender.sendMessage(worldciv + ChatColor.GRAY + " We tried our hardest... but we couldn't find this player.");
+                            return true;
+                        }
+
+                        if(party.hasParty(sender)){
+                            sender.sendMessage(worldciv + ChatColor.GRAY + " You're already in a party!");
                             return true;
                         }
 
@@ -200,7 +201,7 @@ public class Party implements CommandExecutor {
 
                 case "create":
 
-                    if (args.length >= 2) { //If /party accept <this argument or more>
+                    if (args.length >= 2) { //If /party create <this argument or more>
 
                         sender.sendMessage(worldciv + ChatColor.GRAY + " There's too many arguments! Use" + ChatColor.YELLOW + " /party create");
 
@@ -208,9 +209,62 @@ public class Party implements CommandExecutor {
 
                     }
 
-                    com.worldciv.parties.Party party = new com.worldciv.parties.Party();
                     party.create(sender);
+                    return true;
 
+                case "leave":
+
+                    if (args.length >= 2) { //If /party create <this argument or more>
+
+                        sender.sendMessage(worldciv + ChatColor.GRAY + " There's too many arguments! Use" + ChatColor.YELLOW + " /party leave");
+
+                        return true;
+
+                    }
+
+                    party.leave(sender);
+                    return true;
+
+                case "block":
+
+                    if (args.length == 2) { //If /party block <thisisargslength2>
+
+
+                        Player pblock = Bukkit.getServer().getPlayer(args[1]); //DECLARE receiver
+
+                        if (pblock == null || !pblock.isOnline()) { //PLAYER DOES NOT EXIST
+                            sender.sendMessage(worldciv + ChatColor.GRAY + " We tried our hardest... but we couldn't find this player.");
+                            return true;
+                        }
+
+                        if (pblock == sender) { //same player
+                            sender.sendMessage(worldciv + ChatColor.GRAY + " You can't block yourself!");
+                            return true;
+                        }
+
+                        party.block(sender, pblock);
+                        return  true;
+
+
+                    } else if (args.length > 2){   //< or more>
+                      sender.sendMessage(worldciv + ChatColor.GRAY + " There's too many arguments! Use" + ChatColor.YELLOW + " /party block <player>");
+                      return true;
+                    }
+
+                    sender.sendMessage(worldciv + ChatColor.GRAY + " We need more arguments! Use" + ChatColor.YELLOW + " /party block <player>");
+                    return true;
+
+                case "disband":
+
+                    if (args.length >= 2) { //If /party create <this argument or more>
+
+                        sender.sendMessage(worldciv + ChatColor.GRAY + " There's too many arguments! Use" + ChatColor.YELLOW + " /party disband");
+
+                        return true;
+
+                    }
+
+                   party.disband(sender);
                     return true;
 
             }

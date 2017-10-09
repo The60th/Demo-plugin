@@ -9,7 +9,11 @@ public final class utilityMultimaps {
 
     public final static Multimap<String, String> partyrequest = HashMultimap.create();
 
-    public static Multimap<String, String> partyid = HashMultimap.create(); //second one is uuid to string
+    public static Multimap<String, String> partyid = HashMultimap.create(); // sender , uuidtostring
+
+    public static Multimap<String, String> partyleaderid = HashMultimap.create(); // sender , uuidtostring
+
+    public static Multimap<String, String> blockedplayers = HashMultimap.create(); //sender , blockedplayer
 
 
 }
