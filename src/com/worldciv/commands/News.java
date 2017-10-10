@@ -117,13 +117,14 @@ public class News implements CommandExecutor {
                                 return;
                             }
 
-                            x++;
+
                             if (x == 30) {
                                 sender.sendMessage(worldciv + ChatColor.RED + " The time expired!");
                                 setnewsmessage.remove(sender);
                                 cancel();
                                 return;
                             }
+                            x++;
                         }
                     }.runTaskTimer(MainTorch.plugin, 0, 20);
 

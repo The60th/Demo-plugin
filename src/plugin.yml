@@ -11,6 +11,9 @@ commands:
   party:
     description:
     usage:
+  p:
+    description:
+    usage:
 permissions:
   worldciv.togglevision:
     description:

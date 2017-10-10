@@ -3,10 +3,7 @@ package com.worldciv.the60th;
 import com.worldciv.commands.News;
 import com.worldciv.commands.PartyCommand;
 import com.worldciv.commands.Toggle;
-import com.worldciv.events.player.commandPreprocess;
-import com.worldciv.events.player.join;
-import com.worldciv.events.player.quit;
-import com.worldciv.events.player.weatherChangeEvent;
+import com.worldciv.events.player.*;
 import com.worldciv.scoreboard.scoreboardManager;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
@@ -84,6 +81,7 @@ public class MainTorch extends JavaPlugin implements Listener{
         getCommand("toggle").setExecutor(new Toggle());
         getCommand("news").setExecutor(new News());
         getCommand("party").setExecutor(new PartyCommand());
+        getCommand("p").setExecutor(new PartyCommand());
     }
 
     public void registerEvents(){
@@ -92,6 +90,7 @@ public class MainTorch extends JavaPlugin implements Listener{
         pm.registerEvents(new join(), this);
         pm.registerEvents(new commandPreprocess(), this);
         pm.registerEvents(new weatherChangeEvent(), this);
+        pm.registerEvents(new anvilCreate(), this);
 
     }
 
