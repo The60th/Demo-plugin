@@ -74,7 +74,7 @@ public class News implements CommandExecutor {
                         MainTorch.plugin.getConfig().set("newsmessage", "          " + newsstring);
                         MainTorch.plugin.saveConfig();
 
-                        sender.sendMessage(worldciv + ChatColor.GREEN + "The news message has been set to: ");
+                        sender.sendMessage(worldciv + ChatColor.GREEN + " The news message has been set to: ");
 
                         Bukkit.broadcastMessage(worldciv + ChatColor.GRAY + " The news has been updated! Check the scoreboard or /news");
 
@@ -84,7 +84,7 @@ public class News implements CommandExecutor {
                     Player p = (Player) sender;
 
                     if (setnewsmessage.contains(sender)) {
-                        sender.sendMessage(worldciv + ChatColor.GRAY + "You can't use this again! Confirm with" + ChatColor.YELLOW + " /news y" + ChatColor.RED + " or" + ChatColor.YELLOW + " /news n");
+                        sender.sendMessage(worldciv + ChatColor.GRAY + " You can't use this again! Confirm with" + ChatColor.YELLOW + " /news y" + ChatColor.GRAY + " or" + ChatColor.YELLOW + " /news n");
                         return true;
                     }
 

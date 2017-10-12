@@ -5,6 +5,8 @@ import com.worldciv.commands.PartyCommand;
 import com.worldciv.commands.Toggle;
 import com.worldciv.events.player.*;
 import com.worldciv.scoreboard.scoreboardManager;
+import com.worldciv.utility.CraftingRecipes;
+import com.worldciv.utility.FurnaceRecipes;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Server;
@@ -67,6 +69,10 @@ public class MainTorch extends JavaPlugin implements Listener{
             p.setScoreboard(Bukkit.getScoreboardManager().getNewScoreboard()); //REMOVES CURRENT SB if at all any.
             scoreboardManager.setScoreboard(p);
         }
+
+        CraftingRecipes.registerRecipes();
+        FurnaceRecipes.registerFurnaceRecipes();
+
         Bukkit.broadcastMessage(worldciv + ChatColor.GRAY + " Refreshing plugin data.");
     }
 
@@ -91,6 +97,8 @@ public class MainTorch extends JavaPlugin implements Listener{
         pm.registerEvents(new commandPreprocess(), this);
         pm.registerEvents(new weatherChangeEvent(), this);
         pm.registerEvents(new anvilCreate(), this);
+        pm.registerEvents(new craftCreate(), this);
+        pm.registerEvents(new furnaceCreate(), this);
 
     }
 
