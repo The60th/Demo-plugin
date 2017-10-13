@@ -7,16 +7,17 @@ import com.worldciv.events.player.*;
 import com.worldciv.scoreboard.scoreboardManager;
 import com.worldciv.utility.CraftingRecipes;
 import com.worldciv.utility.FurnaceRecipes;
-import org.bukkit.Bukkit;
-import org.bukkit.ChatColor;
-import org.bukkit.Server;
+import org.bukkit.*;
+import org.bukkit.block.Biome;
 import org.bukkit.entity.Player;
 import org.bukkit.event.Listener;
+import org.bukkit.inventory.ItemStack;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.PluginDescriptionFile;
 import org.bukkit.plugin.PluginManager;
 import org.bukkit.plugin.java.JavaPlugin;
 
+import java.util.Random;
 import java.util.logging.Logger;
 
 import static com.worldciv.utility.utilityStrings.worldciv;
@@ -62,6 +63,59 @@ public class MainTorch extends JavaPlugin implements Listener{
 
                 }
 
+                for (Player players : Bukkit.getOnlinePlayers()) {
+                    Location loc = players.getLocation();
+                    World world = players.getWorld();
+                    Biome biome = world.getBiome(loc.getBlockX(), loc.getBlockZ());
+
+                    if (world.hasStorm()) {
+
+                        if (!(biome == Biome.DESERT || biome == Biome.DESERT_HILLS | biome == Biome.MUTATED_DESERT || biome == Biome.MESA || biome == Biome.MESA_CLEAR_ROCK
+                                || biome == Biome.MESA_ROCK || biome == Biome.MUTATED_MESA || biome == Biome.MUTATED_MESA_CLEAR_ROCK || biome == Biome.MUTATED_MESA_ROCK
+                                || biome == Biome.SAVANNA || biome == Biome.SAVANNA_ROCK || biome == Biome.MUTATED_SAVANNA || biome == Biome.MUTATED_SAVANNA_ROCK)) {
+
+
+
+                            if (world.getHighestBlockYAt(loc.getBlockX(), loc.getBlockZ()) < players.getLocation().getBlockY() + 1) {
+
+
+                                ItemStack currentItem = players.getInventory().getItemInMainHand();
+                                ItemStack offHandItem = players.getInventory().getItemInOffHand();
+
+                                if (currentItem.getType() == Material.TORCH) {
+                                    Random r = new Random();
+                                    int chance = r.nextInt(1200000);
+
+                                    if (chance < 150000) {
+                                        if (currentItem.getAmount() > 1) {
+                                            currentItem.setAmount(currentItem.getAmount() - 1);
+                                            players.sendMessage(worldciv + ChatColor.GRAY + " The storm has made one of your torches useless!");
+                                        } else {
+                                            currentItem.setAmount(-1);
+                                            players.sendMessage(worldciv + ChatColor.GRAY + " Your last torch  in your main hand was used!");
+                                        }
+
+                                    }
+                                } else if (offHandItem.getType() == Material.TORCH) {
+                                    Random r = new Random();
+                                    int chance = r.nextInt(1200000);
+
+                                    if (chance < 150000) {
+                                        if (offHandItem.getAmount() > 1) {
+                                            offHandItem.setAmount(offHandItem.getAmount() - 1);
+                                            players.sendMessage(worldciv + ChatColor.GRAY + " The storm has made one of your torches useless!");
+                                        } else {
+                                            offHandItem.setAmount(-1);
+                                            players.sendMessage(worldciv + ChatColor.GRAY + " Your last torch in your offhand was used!");
+                                        }
+
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+
             }
         }, 0, 40); //every 2s, try not to jam the server!
 
@@ -88,6 +142,7 @@ public class MainTorch extends JavaPlugin implements Listener{
         getCommand("news").setExecutor(new News());
         getCommand("party").setExecutor(new PartyCommand());
         getCommand("p").setExecutor(new PartyCommand());
+        getCommand("t").setExecutor(new Toggle());
     }
 
     public void registerEvents(){

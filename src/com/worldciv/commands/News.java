@@ -12,6 +12,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.scheduler.BukkitRunnable;
 
 import static com.worldciv.utility.utilityArrays.setnewsmessage;
+import static com.worldciv.utility.utilityArrays.toggledisplay;
 import static com.worldciv.utility.utilityStrings.*;
 
 public class News implements CommandExecutor {
@@ -32,6 +33,7 @@ public class News implements CommandExecutor {
                         sender.sendMessage(ChatColor.translateAlternateColorCodes('&', MainTorch.plugin.getConfig().getString("newsmessage")));
                     }
                     sender.sendMessage(" ");
+                    if(toggledisplay.contains(sender)) sender.sendMessage(ChatColor.GRAY + " In order to be able to see the animation display use /t sb and /t anim");
                     sender.sendMessage(mainbot);
                     return true;
                 } else {

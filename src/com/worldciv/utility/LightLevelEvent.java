@@ -127,8 +127,26 @@ public class LightLevelEvent  {
     }
 
     private static void blindPlayer(Player player){
-        if(!togglevisionmessage.contains(player)) player.sendMessage(worldciv + ChatColor.GRAY + " Your vision becomes unclear.");
+
+        Location location = player.getLocation();
+        Location vision = new Location(location.getWorld(), location.getX(), location.getY() + 1, location.getZ());
+        if(!togglevisionmessage.contains(player)){
+
+            if(vision.getBlock().getType() == Material.WATER || vision.getBlock().getType() == Material.STATIONARY_WATER ){
+                if(player.getInventory().getItemInMainHand().getType() == Material.TORCH || player.getInventory().getItemInOffHand().getType() == Material.TORCH) {
+                    player.sendMessage(worldciv + ChatColor.GRAY + " Your torch is wet!");
+                } else {
+                    player.sendMessage(worldciv + ChatColor.GRAY + " Your vision becomes unclear.");
+                }
+            } else {
+                player.sendMessage(worldciv + ChatColor.GRAY + " Your vision becomes unclear.");
+            }
+
+        }
         player.addPotionEffect(new PotionEffect(PotionEffectType.BLINDNESS,20000,2));
+
+
+
     }
     private static void unBlindPlayer(Player player){
         if(!togglevisionmessage.contains(player)) player.sendMessage(worldciv + ChatColor.GRAY + " Your vision becomes clear.");

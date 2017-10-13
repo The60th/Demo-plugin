@@ -1,11 +1,11 @@
 package com.worldciv.events.player;
 
-import org.bukkit.Bukkit;
-import org.bukkit.ChatColor;
-import org.bukkit.Material;
-import org.bukkit.Sound;
+import net.minecraft.server.v1_11_R1.EnumParticle;
+import net.minecraft.server.v1_11_R1.PacketPlayOutWorldParticles;
+import org.bukkit.*;
 import org.bukkit.block.Block;
 import org.bukkit.block.Furnace;
+import org.bukkit.craftbukkit.v1_11_R1.entity.CraftPlayer;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.HumanEntity;
 import org.bukkit.entity.Player;
@@ -41,13 +41,16 @@ public class furnaceCreate implements Listener {
             if (itemsInFurnace[0].getItemMeta().getLore() == null){
                 itemsInFurnace[0].setAmount(-1);
                 List<Entity> near = furnace.getWorld().getEntities();
-                for (Entity players : near) {
+                PacketPlayOutWorldParticles packet = new PacketPlayOutWorldParticles(EnumParticle.VILLAGER_ANGRY, true, furnace.getLocation().getBlockX(), furnace.getLocation().getBlockY(), furnace.getLocation().getBlockZ(), 1, 1, 1, 10, 50, null);
 
+                for (Entity players : near) {
                     if (players instanceof Player) {
                         if (players.getLocation().distance(furnace.getLocation()) <= 10) {
 
                             ((Player) players).updateInventory(); //it glitches with non-vanilla items, thts why we update
                             players.sendMessage(worldciv + ChatColor.GRAY + " The egg(s) fried!");
+
+                         ((CraftPlayer) players).getHandle().playerConnection.sendPacket(packet);
 
                         }
 
@@ -62,6 +65,24 @@ public class furnaceCreate implements Listener {
             }
 
            else if (itemsInFurnace[0].getItemMeta().getLore().get(0) == "imisspetra") {
+
+                List<Entity> near = furnace.getWorld().getEntities();
+                PacketPlayOutWorldParticles packet = new PacketPlayOutWorldParticles(EnumParticle.VILLAGER_HAPPY, true, furnace.getLocation().getBlockX(), furnace.getLocation().getBlockY(), furnace.getLocation().getBlockZ(), 1, 1, 1, 10, 50, null);
+
+                for (Entity players : near) {
+                    if (players instanceof Player) {
+                        if (players.getLocation().distance(furnace.getLocation()) <= 10) {
+
+                            ((Player) players).updateInventory(); //it glitches with non-vanilla items, thts why we update
+                            players.sendMessage(worldciv + ChatColor.GRAY + " The egg(s) transformed into meat!");
+
+                            ((CraftPlayer) players).getHandle().playerConnection.sendPacket(packet);
+
+                        }
+
+                    }
+                }
+
                 Bukkit.getServer().getWorld("world").playSound(furnace.getLocation(), Sound.ENTITY_ARROW_HIT_PLAYER, 5L, 0);
             }
         }
@@ -96,7 +117,6 @@ public class furnaceCreate implements Listener {
 
             if (itemsInFurnace[0].getItemMeta().getLore().get(0) == "imisspetra") {
 
-                Bukkit.broadcastMessage("I miss Petra Egg and Coal located!");
                 e.setBurnTime(200); //200 is one item
             }
         }

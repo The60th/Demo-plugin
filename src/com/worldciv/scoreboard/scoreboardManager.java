@@ -67,6 +67,7 @@ public class scoreboardManager {
                     cancel();
                 }
 
+
                 updateScoreboard(player, obj, newsteam, torchteam , blankscoreofficial); //update every tick
             }
 

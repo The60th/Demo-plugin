@@ -2,6 +2,7 @@ package com.worldciv.scoreboard;
 
 import com.worldciv.the60th.MainTorch;
 import com.worldciv.utility.Scroller;
+import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
 import org.bukkit.scheduler.BukkitRunnable;
@@ -35,7 +36,15 @@ public final class animationManager {
                 cancel();
             }
 
-            
+            if(dummytoggleboard.contains(player) || toggledisplay.contains(player)){
+                newsTeam.setPrefix(ChatColor.RED + "/news");
+                objective.setDisplayName(defaultcolor + "World-Civ");
+                team.setPrefix(ChatColor.GRAY + "          ");
+                team.setSuffix(ChatColor.GRAY + "           "); //DO NOT DELET!
+                cancel();
+                return;
+            }
+
 
 
             if (MainTorch.plugin.getConfig().getString("newsmessage") == null || MainTorch.plugin.getConfig().getString("newsmessage").equals("          " + ChatColor.YELLOW + "empty") || MainTorch.plugin.getConfig().getString("newsmessage").isEmpty()) {
@@ -319,11 +328,7 @@ public final class animationManager {
             }
         }
 
-        else if (toggledisplay.contains(player)){
-            objective.setDisplayName(defaultcolor + "World-Civ");
-            team.setPrefix(ChatColor.GRAY + "          ");
-            team.setSuffix(ChatColor.GRAY + "           "); //DO NOT DELET!
-        }
+
     }
 
 }.runTaskTimer(MainTorch.plugin, 0, 5);

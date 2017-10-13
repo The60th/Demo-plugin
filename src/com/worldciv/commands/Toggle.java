@@ -16,7 +16,7 @@ import static com.worldciv.utility.utilityStrings.worldciv;
 public class Toggle implements CommandExecutor {
     @Override
     public boolean onCommand(CommandSender sender, Command cmd, String alias, String[] args) {
-        if (cmd.getName().equalsIgnoreCase("toggle")) {
+        if (cmd.getName().equalsIgnoreCase("toggle") ||cmd.getName().equalsIgnoreCase("t" )) {
             if (!(sender instanceof Player)) {
                 sender.sendMessage(ChatColor.RED + "You must be a player to access this command!");
 
@@ -70,6 +70,7 @@ public class Toggle implements CommandExecutor {
                 if (toggledisplay.contains(p)) {
                     toggledisplay.remove(p);
                     p.sendMessage(worldciv + ChatColor.GRAY + " The display title's animation has been enabled!");
+                    MainTorch.getScoreboardManager().setScoreboard(p);
                     return true;
 
                 } else if (!toggledisplay.contains(p)) {
